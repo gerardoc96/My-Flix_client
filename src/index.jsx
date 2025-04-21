@@ -1,4 +1,8 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { store } from './app/store';
+import { Provider } from 'react-redux';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import "./index.scss";
 
