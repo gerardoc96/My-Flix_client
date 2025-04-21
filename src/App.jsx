@@ -9,7 +9,7 @@ import Navbar from './components/navbar/Navbar';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 
 
-export function App() {
+export default function App() {
   return (
     <>
       <Routes>
