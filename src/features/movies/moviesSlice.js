@@ -4,6 +4,7 @@ import api from '../../api/axios';
 // Thunk for fetching all movies
 export const getMovies = createAsyncThunk(
   'movies/getAll',
+
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await api.get('/movies');

@@ -32,23 +32,30 @@ export default function MovieListPage() {
 
   return (
     <Container >
+
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
         {movies.map(movie => (
+
           <Col key={movie._id}>
             <Card>
+
               <Link to={'/movies/${movie._id}'}>
                 <Card.Img
                   src={movie.ImagePath}
                   alt={movie.Title}
                 />
               </Link>
+
               <Card.Body>
                 <Card.Title>{movie.Title}</Card.Title>
               </Card.Body>
+
             </Card>
           </Col>
+
         ))}
       </Row>
+
     </Container>
   );
 }

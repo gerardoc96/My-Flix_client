@@ -4,6 +4,7 @@ import api from '../../api/axios';
 // async thunk for login
 export const login = createAsyncThunk(
   'auth/login',
+
   async ({ username, password }, { rejectWithValue }) => {
     try {
       const { data } = await api.post('/login', {
