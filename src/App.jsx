@@ -5,13 +5,15 @@ import SignupPage from './pages/SignupPage';
 import MovieListPage from './pages/MovieListPage';
 import MovieDetailsPage from './pages/MovieDetailsPage';
 import ProfilePage from './pages/ProfilePage';
-import Navbar from './components/navbar/Navbar';
+import NavigationBar from './components/navigationbar/NavigationBar';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 
 
 export default function App() {
   return (
     <>
+      <NavigationBar />
+
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -26,6 +28,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/movies/:movieId"
           element={
@@ -34,6 +37,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/profile"
           element={
@@ -42,6 +46,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         {/* Fallback Routes */}
         <Route path="/" element={<Navigate to="/movies" />} />
         {/* <Route path="*" element={<NotFoundPage />} /> */}
