@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import MovieListPage from './pages/MovieListPage';
-import MovieDetailsPage from './pages/MovieDetailspage';
+import MovieDetailsPage from './pages/MovieDetailsPage';
 import ProfilePage from './pages/ProfilePage';
 import Navbar from './components/navbar/Navbar';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
@@ -44,7 +44,7 @@ export default function App() {
         />
         {/* Fallback Routes */}
         <Route path="/" element={<Navigate to="/movies" />} />
-        <Route path="*" element={<NotFoundPage />} />
+        {/* <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>
     </>
   )

@@ -17,22 +17,28 @@ export const login = createAsyncThunk(
   }
 );
 
+// Initialize state from localStorage if available
+const tokenFromStorage = localStorage.getItem('token');
+const userFromStorage = localStorage.getItem('user');
+
+const initialState = {
+  user: userFromStorage ? JSON.parse(userFromStorage) : null,
+  token: tokenFromStorage || null,
+  status: 'idle',
+  error: null
+};
+
 // initial state
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    token: null,
-    status: 'idle',
-    error: null
-  },
-
+  initialState,
   // clears out user and token on logout
   reducers: {
     logout: (state) => {
       state.user = null;
       state.token = null;
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
     }
   },
 
@@ -48,6 +54,7 @@ const authSlice = createSlice({
         state.user = payload.user;
         state.token = payload.token;
         localStorage.setItem('token', payload.token);
+        localStorage.setItem('user', JSON.stringify(payload.user));
       })
       .addCase(login.rejected, (state, { payload }) => {
         state.status = 'failed';
