@@ -22418,21 +22418,26 @@ const login = (0, _toolkit.createAsyncThunk)("auth/login", async ({ username, pa
         return rejectWithValue(error.response?.data || error.message);
     }
 });
+// Initialize state from localStorage if available
+const tokenFromStorage = localStorage.getItem("token");
+const userFromStorage = localStorage.getItem("user");
+const initialState = {
+    user: userFromStorage ? JSON.parse(userFromStorage) : null,
+    token: tokenFromStorage || null,
+    status: "idle",
+    error: null
+};
 // initial state
 const authSlice = (0, _toolkit.createSlice)({
     name: "auth",
-    initialState: {
-        user: null,
-        token: null,
-        status: "idle",
-        error: null
-    },
+    initialState,
     // clears out user and token on logout
     reducers: {
         logout: (state)=>{
             state.user = null;
             state.token = null;
             localStorage.removeItem("token");
+            localStorage.removeItem("user");
         }
     },
     // handles the three states of the login async thunk
@@ -22445,6 +22450,7 @@ const authSlice = (0, _toolkit.createSlice)({
             state.user = payload.user;
             state.token = payload.token;
             localStorage.setItem("token", payload.token);
+            localStorage.setItem("user", JSON.stringify(payload.user));
         }).addCase(login.rejected, (state, { payload })=>{
             state.status = "failed";
             state.error = payload.massage || "Login failed";
