@@ -22404,6 +22404,7 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
 parcelHelpers.export(exports, "signup", ()=>signup);
+parcelHelpers.export(exports, "updateUser", ()=>updateUser);
 parcelHelpers.export(exports, "logout", ()=>logout);
 var _toolkit = require("@reduxjs/toolkit");
 var _axios = require("../../api/axios");
@@ -22432,6 +22433,20 @@ const signup = (0, _toolkit.createAsyncThunk)("auth/signup", async ({ Username, 
         return rejectWithValue(error.response?.data || error.message);
     }
 });
+const updateUser = (0, _toolkit.createAsyncThunk)("auth/updateUser", async ({ Username, Password, Email, Birthday }, { getState, rejectWithValue })=>{
+    const { auth: { user } } = getState();
+    try {
+        const { data } = await (0, _axiosDefault.default).put(`/users/${user.Username}`, {
+            Username,
+            Password,
+            Email,
+            Birthday
+        });
+        return data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
 // Initialize state from localStorage if available
 const tokenFromStorage = localStorage.getItem("token");
 const userFromStorage = localStorage.getItem("user");
@@ -22441,7 +22456,9 @@ const initialState = {
     status: "idle",
     error: null,
     signupStatus: "idle",
-    signupError: null
+    signupError: null,
+    updateStatus: "idle",
+    updateError: null
 };
 // initial state
 const authSlice = (0, _toolkit.createSlice)({
@@ -22479,6 +22496,16 @@ const authSlice = (0, _toolkit.createSlice)({
         }).addCase(signup.rejected, (state, { payload })=>{
             state.signupStatus = "failed";
             state.signupError = payload.errors ? payload.errors.map((e)=>e.msg).join(", ") : payload.message || "Signup failed";
+        })// handles the three states of the updateUser async thunk
+        .addCase(updateUser.pending, (state)=>{
+            state.updateStatus = "loading";
+            state.updateError = null;
+        }).addCase(updateUser.fulfilled, (state, { payload })=>{
+            state.updateStatus = "succeeded";
+            state.user = payload;
+        }).addCase(updateUser.rejected, (state, { payload })=>{
+            state.updateStatus = "failed";
+            state.updateError = payload.message || "Failed to update profile";
         });
     }
 });
@@ -45565,20 +45592,72 @@ var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 var _reactRedux = require("react-redux");
 var _reactBootstrap = require("react-bootstrap");
+var _authSlice = require("../features/auth/authSlice");
+var _userForm = require("../components/userform/UserForm");
+var _userFormDefault = parcelHelpers.interopDefault(_userForm);
 var _s = $RefreshSig$();
 function ProfilePage() {
     _s();
-    const { user, status } = (0, _reactRedux.useSelector)((state)=>state.auth);
+    const dispatch = (0, _reactRedux.useDispatch)();
+    const { user, updateStatus, updateError } = (0, _reactRedux.useSelector)((state)=>state.auth);
+    // Toggle view vs edit
+    const [isEditing, setIsEditing] = (0, _react.useState)(false);
+    const handleUpdate = (formData)=>{
+        dispatch((0, _authSlice.updateUser)(formData)).then((action)=>{
+            if (action.type === "auth/updateUser/fulfilled") setIsEditing(false);
+        });
+    };
+    const forminitialValues = {
+        Username: user.Username,
+        Password: "",
+        Email: user.Email,
+        Birthday: user.Birthday.slice(0, 10)
+    };
+    const isBusy = updateStatus === "loading";
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
         children: [
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
-                children: "Profile"
-            }, void 0, false, {
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
+                        children: "Profile"
+                    }, void 0, false, {
+                        fileName: "src/pages/ProfilePage.jsx",
+                        lineNumber: 34,
+                        columnNumber: 9
+                    }, this),
+                    isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                        onClick: ()=>setIsEditing(false),
+                        disabled: isBusy,
+                        children: "Cancel"
+                    }, void 0, false, {
+                        fileName: "src/pages/ProfilePage.jsx",
+                        lineNumber: 36,
+                        columnNumber: 11
+                    }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                        onClick: ()=>setIsEditing(true),
+                        children: "Edit Profile"
+                    }, void 0, false, {
+                        fileName: "src/pages/ProfilePage.jsx",
+                        lineNumber: 41,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 10,
+                lineNumber: 33,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
+            isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _userFormDefault.default), {
+                initualValues: forminitialValues,
+                status: updateStatus,
+                error: updateError,
+                onSubmit: handleUpdate,
+                submitLabel: isBusy ? "Saving..." : "Save Changes"
+            }, void 0, false, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 48,
+                columnNumber: 9
+            }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
                 children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup), {
                     variant: "flush",
                     children: [
@@ -45588,16 +45667,16 @@ function ProfilePage() {
                                     children: "Username:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 15,
-                                    columnNumber: 13
+                                    lineNumber: 60,
+                                    columnNumber: 15
                                 }, this),
                                 " ",
                                 user.Username
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 14,
-                            columnNumber: 11
+                            lineNumber: 59,
+                            columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
                             children: [
@@ -45605,16 +45684,16 @@ function ProfilePage() {
                                     children: "Email:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 19,
-                                    columnNumber: 13
+                                    lineNumber: 64,
+                                    columnNumber: 15
                                 }, this),
                                 " ",
                                 user.Email
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 18,
-                            columnNumber: 11
+                            lineNumber: 63,
+                            columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
                             children: [
@@ -45622,54 +45701,54 @@ function ProfilePage() {
                                     children: "Birthday:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 23,
-                                    columnNumber: 13
+                                    lineNumber: 68,
+                                    columnNumber: 15
                                 }, this),
                                 " ",
                                 new Date(user.Birthday).toLocaleDateString()
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 22,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
-                            children: [
-                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
-                                    children: "Username:"
-                                }, void 0, false, {
-                                    fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 28,
-                                    columnNumber: 13
-                                }, this),
-                                " ",
-                                user.Username
-                            ]
-                        }, void 0, true, {
-                            fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 27,
-                            columnNumber: 11
+                            lineNumber: 67,
+                            columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/pages/ProfilePage.jsx",
-                    lineNumber: 12,
-                    columnNumber: 9
+                    lineNumber: 57,
+                    columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 11,
-                columnNumber: 7
+                lineNumber: 56,
+                columnNumber: 9
+            }, this),
+            updateStatus === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                    children: [
+                        "Error: ",
+                        updateEror
+                    ]
+                }, void 0, true, {
+                    fileName: "src/pages/ProfilePage.jsx",
+                    lineNumber: 78,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 77,
+                columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/pages/ProfilePage.jsx",
-        lineNumber: 9,
+        lineNumber: 32,
         columnNumber: 5
     }, this);
 }
-_s(ProfilePage, "s95dNznbjYANMUfH4zJIozfG8gg=", false, function() {
+_s(ProfilePage, "a1Yt2bqG8iX7FPNOib9Z1BomiNY=", false, function() {
     return [
+        (0, _reactRedux.useDispatch),
         (0, _reactRedux.useSelector)
     ];
 });
@@ -45682,7 +45761,210 @@ $RefreshReg$(_c, "ProfilePage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"21dqq","react-redux":"62sf7","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/jsx-dev-runtime":"iTorj"}],"b2vIG":[function(require,module,exports) {
+},{"react":"21dqq","react-redux":"62sf7","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/jsx-dev-runtime":"iTorj","../features/auth/authSlice":"kbh7b","../components/userform/UserForm":"5ZspT"}],"5ZspT":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$ae57 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$ae57.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>UserForm);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _propTypes = require("prop-types");
+var _propTypesDefault = parcelHelpers.interopDefault(_propTypes);
+var _reactBootstrap = require("react-bootstrap");
+var _s = $RefreshSig$();
+function UserForm({ initualValues, status, error, onSubmit, submitLabel }) {
+    _s();
+    const [formData, setFormData] = (0, _react.useState)(initualValues);
+    //Reset local form when initualValues change
+    (0, _react.useEffect)(()=>{
+        setFormData(initualValues);
+    }, [
+        initualValues
+    ]);
+    const handleChange = (e)=>{
+        const { name, value } = e.target;
+        setFormData((Data)=>({
+                ...Data,
+                [name]: value
+            }));
+    };
+    const handleSubmit = (e)=>{
+        e.preventDefault();
+        onSubmit(formData);
+    };
+    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form), {
+        onSubmit: handleSubmit,
+        children: [
+            status === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+                variant: "danger",
+                children: error
+            }, void 0, false, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 31,
+                columnNumber: 31
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "username",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Username"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 34,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Username",
+                        type: "text",
+                        value: formData.Username,
+                        onChange: handleChange,
+                        minLength: 5,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 35,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 33,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "password",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Password"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 46,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Password",
+                        type: "password",
+                        value: formData.Password,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 47,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 45,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "email",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Email"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 57,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Email",
+                        type: "email",
+                        value: formData.Email,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 58,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 56,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "birthday",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Birthday"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 68,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Birthday",
+                        type: "date",
+                        value: formData.Birthday,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 69,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 67,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                type: "submit",
+                disabled: status === "loading",
+                children: status === "loading" ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
+                    as: "span",
+                    animation: "border",
+                    size: "sm"
+                }, void 0, false, {
+                    fileName: "src/components/userform/UserForm.jsx",
+                    lineNumber: 80,
+                    columnNumber: 13
+                }, this) : submitLabel
+            }, void 0, false, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 78,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "src/components/userform/UserForm.jsx",
+        lineNumber: 30,
+        columnNumber: 5
+    }, this);
+}
+_s(UserForm, "UV1SM7OZDXvQkRTWautY+hL9UDg=");
+_c = UserForm;
+UserForm.propTypes = {
+    initialValues: (0, _propTypesDefault.default).shape({
+        Username: (0, _propTypesDefault.default).string,
+        Password: (0, _propTypesDefault.default).string,
+        Email: (0, _propTypesDefault.default).string,
+        Birthday: (0, _propTypesDefault.default).string
+    }).isRequired,
+    status: (0, _propTypesDefault.default).string.isRequired,
+    error: (0, _propTypesDefault.default).string,
+    onSubmit: (0, _propTypesDefault.default).func.isRequired,
+    submitLabel: (0, _propTypesDefault.default).string.isRequired
+};
+var _c;
+$RefreshReg$(_c, "UserForm");
+
+  $parcel$ReactRefreshHelpers$ae57.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","prop-types":"7wKI2","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"b2vIG":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$e910 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
