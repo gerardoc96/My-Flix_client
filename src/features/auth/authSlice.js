@@ -18,6 +18,25 @@ export const login = createAsyncThunk(
   }
 );
 
+// async thunk for signup
+export const signup = createAsyncThunk(
+  'auth/signup',
+
+  async ({ Username, Password, Email, Birthday }, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post('/users', {
+        Username: Username,
+        Password: Password,
+        Email: Email,
+        Birthday: Birthday
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 // Initialize state from localStorage if available
 const tokenFromStorage = localStorage.getItem('token');
 const userFromStorage = localStorage.getItem('user');
@@ -26,7 +45,9 @@ const initialState = {
   user: userFromStorage ? JSON.parse(userFromStorage) : null,
   token: tokenFromStorage || null,
   status: 'idle',
-  error: null
+  error: null,
+  signupStatus: 'idle',
+  signupError: null
 };
 
 // initial state
@@ -43,9 +64,10 @@ const authSlice = createSlice({
     }
   },
 
-  // handles the three states of the login async thunk
+
   extraReducers: builder => {
     builder
+      // handles the three states of the login async thunk
       .addCase(login.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -60,6 +82,20 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, { payload }) => {
         state.status = 'failed';
         state.error = payload.massage || 'Login failed';
+      })
+
+      // handles the three states of the signup async thunk
+      .addCase(signup.pending, (state) => {
+        state.signupStatus = 'loading';
+        state.signupError = null;
+      })
+      .addCase(signup.fulfilled, (state) => {
+        state.signupStatus = 'succeeded';
+      })
+      .addCase(signup.rejected, (state, { payload }) => {
+        state.signupStatus = 'failed';
+        state.signupError = payload.errors
+          ? payload.errors.map(e => e.msg).join(', ') : payload.message || 'Signup failed';
       });
   }
 });
