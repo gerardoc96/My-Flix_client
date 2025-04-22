@@ -6,15 +6,15 @@ import { Link } from 'react-router';
 
 export default function MovieListPage() {
   const dispatch = useDispatch();
-  const { list: movies, status, error } = useSelector(state => state.movies);
+  const { list: movies, statusAll, errorAll } = useSelector(state => state.movies);
 
   useEffect(() => {
-    if (status === 'idle') {
+    if (statusAll === 'idle') {
       dispatch(getMovies());
     }
-  }, [status, dispatch]);
+  }, [statusAll, dispatch]);
 
-  if (status === 'loading') {
+  if (statusAll === 'loading') {
     return (
       <Container className="text-center mt-5">
         <Spinner animation="border" role="status" />
@@ -22,7 +22,7 @@ export default function MovieListPage() {
     );
   }
 
-  if (status === 'failed') {
+  if (statusAll === 'failed') {
     return (
       <Container className="text-center mt-5">
         <Alert variant="danger">{error}</Alert>
@@ -39,7 +39,7 @@ export default function MovieListPage() {
           <Col key={movie._id}>
             <Card>
 
-              <Link to={'/movies/${movie._id}'}>
+              <Link to={`/movies/${movie.Title}`}>
                 <Card.Img
                   src={movie.ImagePath}
                   alt={movie.Title}

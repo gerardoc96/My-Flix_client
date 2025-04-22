@@ -30,7 +30,7 @@ export default function App() {
         />
 
         <Route
-          path="/movies/:movieId"
+          path="/movies/:Title"
           element={
             <PrivateRoute>
               <MovieDetailsPage />

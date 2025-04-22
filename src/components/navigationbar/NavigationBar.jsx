@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
-import { NavLink, useNavigate } from 'react-router';
+import { NavLink, useNavigate, useLocation } from 'react-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 
@@ -8,6 +8,9 @@ export default function NavigationBar() {
   const { token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const isMovieDetailsPage = location.pathname.startsWith('/movies/') && location.pathname.split('/').length === 3;
 
   const handleLogout = () => {
     dispatch(logout());
@@ -38,6 +41,8 @@ export default function NavigationBar() {
                   Profile
                 </Nav.Link>
 
+
+
               </>
             )}
           </Nav>
@@ -59,6 +64,11 @@ export default function NavigationBar() {
               <Button onClick={handleLogout}>
                 Logout
               </Button>
+            )}
+
+            {isMovieDetailsPage && (
+              <Button onClick={() => navigate(-1)}>
+                Go Back</Button>
             )}
           </Nav>
 
