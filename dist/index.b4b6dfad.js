@@ -27265,6 +27265,7 @@ exports.default = HttpStatusCode;
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "getMovies", ()=>getMovies);
+parcelHelpers.export(exports, "getMovie", ()=>getMovie);
 var _toolkit = require("@reduxjs/toolkit");
 var _axios = require("../../api/axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
@@ -27276,26 +27277,48 @@ const getMovies = (0, _toolkit.createAsyncThunk)("movies/getAll", async (_, { re
         return rejectWithValue(error.response?.data || error.message);
     }
 });
+const getMovie = (0, _toolkit.createAsyncThunk)("movies/getOne", async (Title, { rejectWithValue })=>{
+    try {
+        const { data } = await (0, _axiosDefault.default).get(`/movies/${encodeURIComponent(Title)}`);
+        return data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
 // initial state
 const moviesSlice = (0, _toolkit.createSlice)({
     name: "movies",
     initialState: {
         list: [],
-        status: "idle",
-        error: null
+        currentMovie: null,
+        statusAll: "idle",
+        StatusOne: "idle",
+        errorAll: null,
+        errorOne: null
     },
     reducers: {},
-    // handles the three states of the thunk
+    // handles the three states of the getMovies thunk
     extraReducers: (builder)=>{
         builder.addCase(getMovies.pending, (state)=>{
-            state.status = "loading";
-            state.error = null;
+            state.statusAll = "loading";
+            state.errorAll = null;
         }).addCase(getMovies.fulfilled, (state, { payload })=>{
-            state.status = "succeeded";
+            state.statusAll = "succeeded";
             state.list = payload;
         }).addCase(getMovies.rejected, (state, { payload })=>{
-            state.status = "failed";
-            state.error = payload.massage || "Could not fetch movies";
+            state.statusAll = "failed";
+            state.errorAll = payload.massage || "Could not fetch movies";
+        })// handles the three states of the getMovie thunk
+        .addCase(getMovie.pending, (state)=>{
+            state.StatusOne = "loading";
+            state.errorOne = null;
+            state.currentMovie = null;
+        }).addCase(getMovie.fulfilled, (state, { payload })=>{
+            state.StatusOne = "succeeded";
+            state.currentMovie = payload;
+        }).addCase(getMovie.rejected, (state, { payload })=>{
+            state.StatusOne = "failed";
+            state.errorOne = payload.massage || "Could not fetch the movie";
         });
     }
 });
@@ -38095,7 +38118,7 @@ function App() {
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactRouter.Route), {
-                        path: "/movies/:movieId",
+                        path: "/movies/:Title",
                         element: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _privateRouteDefault.default), {
                             children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _movieDetailsPageDefault.default), {}, void 0, false, void 0, void 0)
                         }, void 0, false, void 0, void 0)
@@ -38641,7 +38664,7 @@ var _toggleButtonGroupDefault = parcelHelpers.interopDefault(_toggleButtonGroup)
 var _tooltip = require("./Tooltip");
 var _tooltipDefault = parcelHelpers.interopDefault(_tooltip);
 
-},{"./Accordion":false,"./AccordionContext":false,"./AccordionCollapse":false,"./AccordionButton":false,"./AccordionBody":false,"./AccordionHeader":false,"./AccordionItem":false,"./Alert":"e3Xec","./AlertHeading":false,"./AlertLink":false,"./Anchor":false,"./Badge":false,"./Breadcrumb":false,"./BreadcrumbItem":false,"./Button":"aPzUt","./ButtonGroup":false,"./ButtonToolbar":false,"./Card":"lAynp","./CardBody":false,"./CardFooter":false,"./CardGroup":false,"./CardHeader":false,"./CardImg":false,"./CardImgOverlay":false,"./CardLink":false,"./CardSubtitle":false,"./CardText":false,"./CardTitle":false,"./Carousel":false,"./CarouselCaption":false,"./CarouselItem":false,"./CloseButton":false,"./Col":"2L2I6","./Collapse":false,"./Container":"hEdsw","./Dropdown":false,"./DropdownButton":false,"./DropdownDivider":false,"./DropdownHeader":false,"./DropdownItem":false,"./DropdownItemText":false,"./DropdownMenu":false,"./DropdownToggle":false,"./Fade":false,"./Figure":false,"./FigureCaption":false,"./FigureImage":false,"./Form":"iBZ80","./FormControl":false,"./FormCheck":false,"./FormFloating":false,"./FloatingLabel":false,"./FormGroup":false,"./FormLabel":false,"./FormText":false,"./FormSelect":false,"./Image":false,"./InputGroup":false,"./ListGroup":false,"./ListGroupItem":false,"./Modal":false,"./ModalBody":false,"./ModalDialog":false,"./ModalFooter":false,"./ModalHeader":false,"./ModalTitle":false,"./Nav":"cXyL2","./Navbar":"1mHjo","./NavbarBrand":false,"./NavbarCollapse":false,"./NavbarOffcanvas":false,"./NavbarText":false,"./NavbarToggle":false,"./NavDropdown":false,"./NavItem":false,"./NavLink":false,"./Offcanvas":false,"./OffcanvasBody":false,"./OffcanvasHeader":false,"./OffcanvasTitle":false,"./OffcanvasToggling":false,"./Overlay":false,"./OverlayTrigger":false,"./PageItem":false,"./Pagination":false,"./Placeholder":false,"./PlaceholderButton":false,"./Popover":false,"./PopoverBody":false,"./PopoverHeader":false,"./ProgressBar":false,"./Ratio":false,"./Row":"cMC39","./Spinner":"2r8jr","./SplitButton":false,"./SSRProvider":false,"./Stack":false,"./Tab":false,"./TabContainer":false,"./TabContent":false,"./Table":false,"./TabPane":false,"./Tabs":false,"./ThemeProvider":false,"./Toast":false,"./ToastBody":false,"./ToastContainer":false,"./ToastHeader":false,"./ToggleButton":false,"./ToggleButtonGroup":false,"./Tooltip":false,"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"e3Xec":[function(require,module,exports) {
+},{"./Accordion":false,"./AccordionContext":false,"./AccordionCollapse":false,"./AccordionButton":false,"./AccordionBody":false,"./AccordionHeader":false,"./AccordionItem":false,"./Alert":"e3Xec","./AlertHeading":false,"./AlertLink":false,"./Anchor":false,"./Badge":false,"./Breadcrumb":false,"./BreadcrumbItem":false,"./Button":"aPzUt","./ButtonGroup":false,"./ButtonToolbar":false,"./Card":"lAynp","./CardBody":false,"./CardFooter":false,"./CardGroup":false,"./CardHeader":false,"./CardImg":false,"./CardImgOverlay":false,"./CardLink":false,"./CardSubtitle":false,"./CardText":false,"./CardTitle":false,"./Carousel":false,"./CarouselCaption":false,"./CarouselItem":false,"./CloseButton":false,"./Col":"2L2I6","./Collapse":"acuzI","./Container":"hEdsw","./Dropdown":false,"./DropdownButton":false,"./DropdownDivider":false,"./DropdownHeader":false,"./DropdownItem":false,"./DropdownItemText":false,"./DropdownMenu":false,"./DropdownToggle":false,"./Fade":false,"./Figure":false,"./FigureCaption":false,"./FigureImage":false,"./Form":"iBZ80","./FormControl":false,"./FormCheck":false,"./FormFloating":false,"./FloatingLabel":false,"./FormGroup":false,"./FormLabel":false,"./FormText":false,"./FormSelect":false,"./Image":false,"./InputGroup":false,"./ListGroup":false,"./ListGroupItem":false,"./Modal":false,"./ModalBody":false,"./ModalDialog":false,"./ModalFooter":false,"./ModalHeader":false,"./ModalTitle":false,"./Nav":"cXyL2","./Navbar":"1mHjo","./NavbarBrand":false,"./NavbarCollapse":false,"./NavbarOffcanvas":false,"./NavbarText":false,"./NavbarToggle":false,"./NavDropdown":false,"./NavItem":false,"./NavLink":false,"./Offcanvas":false,"./OffcanvasBody":false,"./OffcanvasHeader":false,"./OffcanvasTitle":false,"./OffcanvasToggling":false,"./Overlay":false,"./OverlayTrigger":false,"./PageItem":false,"./Pagination":false,"./Placeholder":false,"./PlaceholderButton":false,"./Popover":false,"./PopoverBody":false,"./PopoverHeader":false,"./ProgressBar":false,"./Ratio":false,"./Row":"cMC39","./Spinner":"2r8jr","./SplitButton":false,"./SSRProvider":false,"./Stack":false,"./Tab":false,"./TabContainer":false,"./TabContent":false,"./Table":false,"./TabPane":false,"./Tabs":false,"./ThemeProvider":false,"./Toast":false,"./ToastBody":false,"./ToastContainer":false,"./ToastHeader":false,"./ToggleButton":false,"./ToggleButtonGroup":false,"./Tooltip":false,"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"e3Xec":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _classnames = require("classnames");
@@ -45155,7 +45178,7 @@ function SignupPage() {
                                 value: Username,
                                 minLength: 5,
                                 onChange: (e)=>setUsername(e.target.value),
-                                placeholder: "At least 5 characters",
+                                placeholder: "At least 5 alphabetic characters",
                                 required: true
                             }, void 0, false, {
                                 fileName: "src/pages/SignupPage.jsx",
@@ -45330,14 +45353,14 @@ var _s = $RefreshSig$();
 function MovieListPage() {
     _s();
     const dispatch = (0, _reactRedux.useDispatch)();
-    const { list: movies, status, error } = (0, _reactRedux.useSelector)((state)=>state.movies);
+    const { list: movies, statusAll, errorAll } = (0, _reactRedux.useSelector)((state)=>state.movies);
     (0, _react.useEffect)(()=>{
-        if (status === "idle") dispatch((0, _moviesSlice.getMovies)());
+        if (statusAll === "idle") dispatch((0, _moviesSlice.getMovies)());
     }, [
-        status,
+        statusAll,
         dispatch
     ]);
-    if (status === "loading") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+    if (statusAll === "loading") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
         className: "text-center mt-5",
         children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
             animation: "border",
@@ -45352,7 +45375,7 @@ function MovieListPage() {
         lineNumber: 19,
         columnNumber: 7
     }, this);
-    if (status === "failed") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+    if (statusAll === "failed") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
         className: "text-center mt-5",
         children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
             variant: "danger",
@@ -45378,7 +45401,7 @@ function MovieListPage() {
                     children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
                         children: [
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactRouter.Link), {
-                                to: "/movies/${movie._id}",
+                                to: `/movies/${movie.Title}`,
                                 children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card).Img, {
                                     src: movie.ImagePath,
                                     alt: movie.Title
@@ -45427,7 +45450,7 @@ function MovieListPage() {
         columnNumber: 5
     }, this);
 }
-_s(MovieListPage, "DSuLYQS9A4M7WGMRdlJPpafJPYs=", false, function() {
+_s(MovieListPage, "5mVesd+UDUawCeclyKvtWPzwAvw=", false, function() {
     return [
         (0, _reactRedux.useDispatch),
         (0, _reactRedux.useSelector)
@@ -45487,8 +45510,265 @@ $RefreshReg$(_c, "PrivateRoute");
   window.$RefreshSig$ = prevRefreshSig;
 }
 },{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router":"dXVwI","react-redux":"62sf7","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"4ZuBh":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$f7e1 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$f7e1.prelude(module);
 
-},{}],"aYU8q":[function(require,module,exports) {
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>MovieDetailsPage);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _reactRouter = require("react-router");
+var _reactRedux = require("react-redux");
+var _moviesSlice = require("../features/movies/moviesSlice");
+var _reactBootstrap = require("react-bootstrap");
+var _s = $RefreshSig$();
+function MovieDetailsPage() {
+    _s();
+    const { Title } = (0, _reactRouter.useParams)();
+    const navigate = (0, _reactRouter.useNavigate)();
+    const dispatch = (0, _reactRedux.useDispatch)();
+    const { currentMovie: movie, statusOne: status, errorOne: error } = (0, _reactRedux.useSelector)((state)=>state.movies);
+    // toggle for Director & Genre
+    const [showGenre, setShowGenre] = (0, _react.useState)(false);
+    const [showDirector, setShowDirector] = (0, _react.useState)(false);
+    (0, _react.useEffect)(()=>{
+        dispatch((0, _moviesSlice.getMovie)(Title));
+    }, [
+        dispatch,
+        Title
+    ]);
+    if (status === "Loading") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
+            animation: "border"
+        }, void 0, false, {
+            fileName: "src/pages/MovieDetailsPage.jsx",
+            lineNumber: 29,
+            columnNumber: 9
+        }, this)
+    }, void 0, false, {
+        fileName: "src/pages/MovieDetailsPage.jsx",
+        lineNumber: 28,
+        columnNumber: 7
+    }, this);
+    if (status === "failed") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+            variant: "danger",
+            children: error || "Could not fetch the movie"
+        }, void 0, false, {
+            fileName: "src/pages/MovieDetailsPage.jsx",
+            lineNumber: 37,
+            columnNumber: 9
+        }, this)
+    }, void 0, false, {
+        fileName: "src/pages/MovieDetailsPage.jsx",
+        lineNumber: 36,
+        columnNumber: 7
+    }, this);
+    if (!movie) return null;
+    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Row), {
+            children: [
+                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Col), {
+                    children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
+                        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card).Img, {
+                            src: movie.ImagePath,
+                            alt: movie.Title
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 55,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "src/pages/MovieDetailsPage.jsx",
+                        lineNumber: 54,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "src/pages/MovieDetailsPage.jsx",
+                    lineNumber: 53,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Col), {
+                    children: [
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
+                            children: movie.Title
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 60,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                            children: movie.Description
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 61,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h5", {
+                            children: [
+                                "Genre: ",
+                                "",
+                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                    variant: "link",
+                                    onClick: ()=>setShowGenre(!showGenre),
+                                    children: movie.Genre.Name
+                                }, void 0, false, {
+                                    fileName: "src/pages/MovieDetailsPage.jsx",
+                                    lineNumber: 66,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 64,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Collapse), {
+                            in: showGenre,
+                            children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                    children: movie.Genre.Description
+                                }, void 0, false, {
+                                    fileName: "src/pages/MovieDetailsPage.jsx",
+                                    lineNumber: 75,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                lineNumber: 74,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 73,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h5", {
+                            children: [
+                                "Director: ",
+                                "",
+                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                    variant: "link",
+                                    onClick: ()=>setShowDirector(!showDirector),
+                                    children: movie.Director.Name
+                                }, void 0, false, {
+                                    fileName: "src/pages/MovieDetailsPage.jsx",
+                                    lineNumber: 82,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 80,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Collapse), {
+                            in: showDirector,
+                            children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                children: [
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                        children: [
+                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                                children: "Bio:"
+                                            }, void 0, false, {
+                                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                                lineNumber: 91,
+                                                columnNumber: 18
+                                            }, this),
+                                            " ",
+                                            movie.Director.Bio
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/pages/MovieDetailsPage.jsx",
+                                        lineNumber: 91,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                        children: [
+                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                                children: "Born:"
+                                            }, void 0, false, {
+                                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                                lineNumber: 92,
+                                                columnNumber: 18
+                                            }, this),
+                                            " ",
+                                            movie.Director.Birth
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/pages/MovieDetailsPage.jsx",
+                                        lineNumber: 92,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                        children: [
+                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                                children: "Died:"
+                                            }, void 0, false, {
+                                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                                lineNumber: 93,
+                                                columnNumber: 18
+                                            }, this),
+                                            " ",
+                                            movie.Director.Death
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/pages/MovieDetailsPage.jsx",
+                                        lineNumber: 93,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                lineNumber: 90,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 89,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "src/pages/MovieDetailsPage.jsx",
+                    lineNumber: 59,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "src/pages/MovieDetailsPage.jsx",
+            lineNumber: 51,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "src/pages/MovieDetailsPage.jsx",
+        lineNumber: 49,
+        columnNumber: 5
+    }, this);
+}
+_s(MovieDetailsPage, "2KltM4cyDC5P4SytfCvKL6COtTg=", false, function() {
+    return [
+        (0, _reactRouter.useParams),
+        (0, _reactRouter.useNavigate),
+        (0, _reactRedux.useDispatch),
+        (0, _reactRedux.useSelector)
+    ];
+});
+_c = MovieDetailsPage;
+var _c;
+$RefreshReg$(_c, "MovieDetailsPage");
+
+  $parcel$ReactRefreshHelpers$f7e1.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router":"dXVwI","react-redux":"62sf7","../features/movies/moviesSlice":"lBL6e","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"aYU8q":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$eae6 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -45511,6 +45791,8 @@ function NavigationBar() {
     const { token } = (0, _reactRedux.useSelector)((state)=>state.auth);
     const dispatch = (0, _reactRedux.useDispatch)();
     const navigate = (0, _reactRouter.useNavigate)();
+    const location = (0, _reactRouter.useLocation)();
+    const isMovieDetailsPage = location.pathname.startsWith("/movies/") && location.pathname.split("/").length === 3;
     const handleLogout = ()=>{
         dispatch((0, _authSlice.logout)());
         navigate("/login");
@@ -45528,12 +45810,12 @@ function NavigationBar() {
                     children: "MyFlix"
                 }, void 0, false, {
                     fileName: "src/components/navigationbar/NavigationBar.jsx",
-                    lineNumber: 22,
+                    lineNumber: 25,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Navbar).Toggle, {}, void 0, false, {
                     fileName: "src/components/navigationbar/NavigationBar.jsx",
-                    lineNumber: 26,
+                    lineNumber: 29,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Navbar).Collapse, {
@@ -45548,7 +45830,7 @@ function NavigationBar() {
                                         children: "Movies"
                                     }, void 0, false, {
                                         fileName: "src/components/navigationbar/NavigationBar.jsx",
-                                        lineNumber: 33,
+                                        lineNumber: 36,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Nav).Link, {
@@ -45557,74 +45839,85 @@ function NavigationBar() {
                                         children: "Profile"
                                     }, void 0, false, {
                                         fileName: "src/components/navigationbar/NavigationBar.jsx",
-                                        lineNumber: 37,
+                                        lineNumber: 40,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true)
                         }, void 0, false, {
                             fileName: "src/components/navigationbar/NavigationBar.jsx",
-                            lineNumber: 29,
+                            lineNumber: 32,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Nav), {
-                            children: !token ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _jsxDevRuntime.Fragment), {
-                                children: [
-                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Nav).Link, {
-                                        as: (0, _reactRouter.NavLink),
-                                        to: "/login",
-                                        children: "Login"
-                                    }, void 0, false, {
-                                        fileName: "src/components/navigationbar/NavigationBar.jsx",
-                                        lineNumber: 49,
-                                        columnNumber: 17
-                                    }, this),
-                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Nav).Link, {
-                                        as: (0, _reactRouter.NavLink),
-                                        to: "/signup",
-                                        children: "Sign Up"
-                                    }, void 0, false, {
-                                        fileName: "src/components/navigationbar/NavigationBar.jsx",
-                                        lineNumber: 53,
-                                        columnNumber: 17
-                                    }, this)
-                                ]
-                            }, void 0, true) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
-                                onClick: handleLogout,
-                                children: "Logout"
-                            }, void 0, false, {
-                                fileName: "src/components/navigationbar/NavigationBar.jsx",
-                                lineNumber: 59,
-                                columnNumber: 15
-                            }, this)
-                        }, void 0, false, {
+                            children: [
+                                !token ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _jsxDevRuntime.Fragment), {
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Nav).Link, {
+                                            as: (0, _reactRouter.NavLink),
+                                            to: "/login",
+                                            children: "Login"
+                                        }, void 0, false, {
+                                            fileName: "src/components/navigationbar/NavigationBar.jsx",
+                                            lineNumber: 54,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Nav).Link, {
+                                            as: (0, _reactRouter.NavLink),
+                                            to: "/signup",
+                                            children: "Sign Up"
+                                        }, void 0, false, {
+                                            fileName: "src/components/navigationbar/NavigationBar.jsx",
+                                            lineNumber: 58,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                    onClick: handleLogout,
+                                    children: "Logout"
+                                }, void 0, false, {
+                                    fileName: "src/components/navigationbar/NavigationBar.jsx",
+                                    lineNumber: 64,
+                                    columnNumber: 15
+                                }, this),
+                                isMovieDetailsPage && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                    onClick: ()=>navigate(-1),
+                                    children: "Go Back"
+                                }, void 0, false, {
+                                    fileName: "src/components/navigationbar/NavigationBar.jsx",
+                                    lineNumber: 70,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
                             fileName: "src/components/navigationbar/NavigationBar.jsx",
-                            lineNumber: 45,
+                            lineNumber: 50,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/components/navigationbar/NavigationBar.jsx",
-                    lineNumber: 27,
+                    lineNumber: 30,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "src/components/navigationbar/NavigationBar.jsx",
-            lineNumber: 20,
+            lineNumber: 23,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "src/components/navigationbar/NavigationBar.jsx",
-        lineNumber: 18,
+        lineNumber: 21,
         columnNumber: 5
     }, this);
 }
-_s(NavigationBar, "mqPm+rf8YZEMYLtYN4P53NCbp9c=", false, function() {
+_s(NavigationBar, "Wp5oh601IIMbr8glYRqeJSFPRSE=", false, function() {
     return [
         (0, _reactRedux.useSelector),
         (0, _reactRedux.useDispatch),
-        (0, _reactRouter.useNavigate)
+        (0, _reactRouter.useNavigate),
+        (0, _reactRouter.useLocation)
     ];
 });
 _c = NavigationBar;
