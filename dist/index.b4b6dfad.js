@@ -22486,7 +22486,7 @@ const authSlice = (0, _toolkit.createSlice)({
             localStorage.setItem("user", JSON.stringify(payload.user));
         }).addCase(login.rejected, (state, { payload })=>{
             state.status = "failed";
-            state.error = payload.massage || "Login failed";
+            state.error = payload.message || "Login failed";
         })// handles the three states of the signup async thunk
         .addCase(signup.pending, (state)=>{
             state.signupStatus = "loading";
@@ -27334,7 +27334,7 @@ const moviesSlice = (0, _toolkit.createSlice)({
             state.list = payload;
         }).addCase(getMovies.rejected, (state, { payload })=>{
             state.statusAll = "failed";
-            state.errorAll = payload.massage || "Could not fetch movies";
+            state.errorAll = payload.message || "Could not fetch movies";
         })// handles the three states of the getMovie thunk
         .addCase(getMovie.pending, (state)=>{
             state.StatusOne = "loading";
@@ -27345,7 +27345,7 @@ const moviesSlice = (0, _toolkit.createSlice)({
             state.currentMovie = payload;
         }).addCase(getMovie.rejected, (state, { payload })=>{
             state.StatusOne = "failed";
-            state.errorOne = payload.massage || "Could not fetch the movie";
+            state.errorOne = payload.message || "Could not fetch the movie";
         });
     }
 });
@@ -45227,16 +45227,14 @@ var _reactRedux = require("react-redux");
 var _reactRouter = require("react-router");
 var _authSlice = require("../features/auth/authSlice");
 var _reactBootstrap = require("react-bootstrap");
+var _userForm = require("../components/userform/UserForm");
+var _userFormDefault = parcelHelpers.interopDefault(_userForm);
 var _s = $RefreshSig$();
 function SignupPage() {
     _s();
     const dispatch = (0, _reactRedux.useDispatch)();
     const navigate = (0, _reactRouter.useNavigate)();
     const { signupStatus, signupError } = (0, _reactRedux.useSelector)((state)=>state.auth);
-    const [Username, setUsername] = (0, _react.useState)("");
-    const [Password, setPassword] = (0, _react.useState)("");
-    const [Email, setEmail] = (0, _react.useState)("");
-    const [Birthday, setBirthday] = (0, _react.useState)("");
     // Redirect to login page after successful signup
     (0, _react.useEffect)(()=>{
         if (signupStatus === "succeeded") navigate("/login", {
@@ -45246,14 +45244,16 @@ function SignupPage() {
         signupStatus,
         navigate
     ]);
-    const handleSubmit = (e)=>{
-        e.preventDefault();
-        dispatch((0, _authSlice.signup)({
-            Username,
-            Password,
-            Email,
-            Birthday
-        }));
+    // Sets initial values as empty
+    const initialValues = {
+        Username: "",
+        Password: "",
+        Email: "",
+        Birthday: ""
+    };
+    // Handles form submission
+    const handleSubmit = (formData)=>{
+        dispatch((0, _authSlice.signup)(formData));
     };
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
         children: [
@@ -45261,7 +45261,7 @@ function SignupPage() {
                 children: "Sign Up"
             }, void 0, false, {
                 fileName: "src/pages/SignupPage.jsx",
-                lineNumber: 31,
+                lineNumber: 35,
                 columnNumber: 7
             }, this),
             signupStatus === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
@@ -45269,139 +45269,18 @@ function SignupPage() {
                 children: signupError
             }, void 0, false, {
                 fileName: "src/pages/SignupPage.jsx",
-                lineNumber: 34,
+                lineNumber: 38,
                 columnNumber: 9
             }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form), {
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _userFormDefault.default), {
+                initialValues: initialValues,
+                status: signupStatus,
+                error: signupError,
                 onSubmit: handleSubmit,
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                        controlId: "username",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                                children: "Username"
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 40,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                                type: "text",
-                                value: Username,
-                                minLength: 5,
-                                onChange: (e)=>setUsername(e.target.value),
-                                placeholder: "At least 5 alphabetic characters",
-                                required: true
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 41,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 39,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                        controlId: "password",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                                children: "Password"
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 52,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                                type: "password",
-                                value: Password,
-                                onChange: (e)=>setPassword(e.target.value),
-                                required: true
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 53,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 51,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                        controlId: "email",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                                children: "Email"
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 62,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                                type: "email",
-                                value: Email,
-                                onChange: (e)=>setEmail(e.target.value),
-                                required: true
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 63,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 61,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                        controlId: "birthday",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                                children: "Birthday"
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 72,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                                type: "date",
-                                value: Birthday,
-                                onChange: (e)=>setBirthday(e.target.value),
-                                required: true
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 73,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 71,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
-                        type: "submit",
-                        disabled: signupStatus === "loading",
-                        children: signupStatus === "Loading" ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
-                            as: "span",
-                            animation: "border",
-                            size: "sm"
-                        }, void 0, false, {
-                            fileName: "src/pages/SignupPage.jsx",
-                            lineNumber: 85,
-                            columnNumber: 15
-                        }, this) : "Sign Up"
-                    }, void 0, false, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 81,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
+                submitLabel: "Sign Up"
+            }, void 0, false, {
                 fileName: "src/pages/SignupPage.jsx",
-                lineNumber: 37,
+                lineNumber: 42,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
@@ -45412,23 +45291,23 @@ function SignupPage() {
                         children: "Log In"
                     }, void 0, false, {
                         fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 91,
+                        lineNumber: 51,
                         columnNumber: 34
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/pages/SignupPage.jsx",
-                lineNumber: 90,
+                lineNumber: 50,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/pages/SignupPage.jsx",
-        lineNumber: 30,
+        lineNumber: 34,
         columnNumber: 5
     }, this);
 }
-_s(SignupPage, "SXp/7ENYsw3aYAAemyCVlPLY/bE=", false, function() {
+_s(SignupPage, "jJn7xtdMV5Gj1Xd0QKNaRyaWy74=", false, function() {
     return [
         (0, _reactRedux.useDispatch),
         (0, _reactRouter.useNavigate),
@@ -45444,7 +45323,210 @@ $RefreshReg$(_c, "SignupPage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","../features/auth/authSlice":"kbh7b","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"1rZCQ":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","../features/auth/authSlice":"kbh7b","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","../components/userform/UserForm":"5ZspT"}],"5ZspT":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$ae57 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$ae57.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>UserForm);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _propTypes = require("prop-types");
+var _propTypesDefault = parcelHelpers.interopDefault(_propTypes);
+var _reactBootstrap = require("react-bootstrap");
+var _s = $RefreshSig$();
+function UserForm({ initialValues, status, error, onSubmit, submitLabel }) {
+    _s();
+    const [formData, setFormData] = (0, _react.useState)(initialValues);
+    //Reset local form when initialValues change
+    (0, _react.useEffect)(()=>{
+        setFormData(initialValues);
+    }, [
+        initialValues
+    ]);
+    const handleChange = (e)=>{
+        const { name, value } = e.target;
+        setFormData((Data)=>({
+                ...Data,
+                [name]: value
+            }));
+    };
+    const handleSubmit = (e)=>{
+        e.preventDefault();
+        onSubmit(formData);
+    };
+    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form), {
+        onSubmit: handleSubmit,
+        children: [
+            status === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+                variant: "danger",
+                children: error
+            }, void 0, false, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 31,
+                columnNumber: 31
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "username",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Username"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 34,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Username",
+                        type: "text",
+                        value: formData.Username,
+                        onChange: handleChange,
+                        minLength: 5,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 35,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 33,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "password",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Password"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 46,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Password",
+                        type: "password",
+                        value: formData.Password,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 47,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 45,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "email",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Email"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 57,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Email",
+                        type: "email",
+                        value: formData.Email,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 58,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 56,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "birthday",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Birthday"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 68,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Birthday",
+                        type: "date",
+                        value: formData.Birthday,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 69,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 67,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                type: "submit",
+                disabled: status === "loading",
+                children: status === "loading" ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
+                    as: "span",
+                    animation: "border",
+                    size: "sm"
+                }, void 0, false, {
+                    fileName: "src/components/userform/UserForm.jsx",
+                    lineNumber: 80,
+                    columnNumber: 13
+                }, this) : submitLabel
+            }, void 0, false, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 78,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "src/components/userform/UserForm.jsx",
+        lineNumber: 30,
+        columnNumber: 5
+    }, this);
+}
+_s(UserForm, "ZiBkvzYxlLOw7MKsQ58XtUjqjlY=");
+_c = UserForm;
+UserForm.propTypes = {
+    initialValues: (0, _propTypesDefault.default).shape({
+        Username: (0, _propTypesDefault.default).string,
+        Password: (0, _propTypesDefault.default).string,
+        Email: (0, _propTypesDefault.default).string,
+        Birthday: (0, _propTypesDefault.default).string
+    }).isRequired,
+    status: (0, _propTypesDefault.default).string.isRequired,
+    error: (0, _propTypesDefault.default).string,
+    onSubmit: (0, _propTypesDefault.default).func.isRequired,
+    submitLabel: (0, _propTypesDefault.default).string.isRequired
+};
+var _c;
+$RefreshReg$(_c, "UserForm");
+
+  $parcel$ReactRefreshHelpers$ae57.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","prop-types":"7wKI2","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"1rZCQ":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$41d1 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -45648,7 +45730,7 @@ function ProfilePage() {
                 columnNumber: 7
             }, this),
             isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _userFormDefault.default), {
-                initualValues: forminitialValues,
+                initialValues: forminitialValues,
                 status: updateStatus,
                 error: updateError,
                 onSubmit: handleUpdate,
@@ -45761,210 +45843,7 @@ $RefreshReg$(_c, "ProfilePage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"21dqq","react-redux":"62sf7","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/jsx-dev-runtime":"iTorj","../features/auth/authSlice":"kbh7b","../components/userform/UserForm":"5ZspT"}],"5ZspT":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$ae57 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$ae57.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "default", ()=>UserForm);
-var _jsxDevRuntime = require("react/jsx-dev-runtime");
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-var _propTypes = require("prop-types");
-var _propTypesDefault = parcelHelpers.interopDefault(_propTypes);
-var _reactBootstrap = require("react-bootstrap");
-var _s = $RefreshSig$();
-function UserForm({ initualValues, status, error, onSubmit, submitLabel }) {
-    _s();
-    const [formData, setFormData] = (0, _react.useState)(initualValues);
-    //Reset local form when initualValues change
-    (0, _react.useEffect)(()=>{
-        setFormData(initualValues);
-    }, [
-        initualValues
-    ]);
-    const handleChange = (e)=>{
-        const { name, value } = e.target;
-        setFormData((Data)=>({
-                ...Data,
-                [name]: value
-            }));
-    };
-    const handleSubmit = (e)=>{
-        e.preventDefault();
-        onSubmit(formData);
-    };
-    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form), {
-        onSubmit: handleSubmit,
-        children: [
-            status === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
-                variant: "danger",
-                children: error
-            }, void 0, false, {
-                fileName: "src/components/userform/UserForm.jsx",
-                lineNumber: 31,
-                columnNumber: 31
-            }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                controlId: "username",
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                        children: "Username"
-                    }, void 0, false, {
-                        fileName: "src/components/userform/UserForm.jsx",
-                        lineNumber: 34,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                        name: "Username",
-                        type: "text",
-                        value: formData.Username,
-                        onChange: handleChange,
-                        minLength: 5,
-                        required: true
-                    }, void 0, false, {
-                        fileName: "src/components/userform/UserForm.jsx",
-                        lineNumber: 35,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "src/components/userform/UserForm.jsx",
-                lineNumber: 33,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                controlId: "password",
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                        children: "Password"
-                    }, void 0, false, {
-                        fileName: "src/components/userform/UserForm.jsx",
-                        lineNumber: 46,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                        name: "Password",
-                        type: "password",
-                        value: formData.Password,
-                        onChange: handleChange,
-                        required: true
-                    }, void 0, false, {
-                        fileName: "src/components/userform/UserForm.jsx",
-                        lineNumber: 47,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "src/components/userform/UserForm.jsx",
-                lineNumber: 45,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                controlId: "email",
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                        children: "Email"
-                    }, void 0, false, {
-                        fileName: "src/components/userform/UserForm.jsx",
-                        lineNumber: 57,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                        name: "Email",
-                        type: "email",
-                        value: formData.Email,
-                        onChange: handleChange,
-                        required: true
-                    }, void 0, false, {
-                        fileName: "src/components/userform/UserForm.jsx",
-                        lineNumber: 58,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "src/components/userform/UserForm.jsx",
-                lineNumber: 56,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                controlId: "birthday",
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                        children: "Birthday"
-                    }, void 0, false, {
-                        fileName: "src/components/userform/UserForm.jsx",
-                        lineNumber: 68,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                        name: "Birthday",
-                        type: "date",
-                        value: formData.Birthday,
-                        onChange: handleChange,
-                        required: true
-                    }, void 0, false, {
-                        fileName: "src/components/userform/UserForm.jsx",
-                        lineNumber: 69,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "src/components/userform/UserForm.jsx",
-                lineNumber: 67,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
-                type: "submit",
-                disabled: status === "loading",
-                children: status === "loading" ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
-                    as: "span",
-                    animation: "border",
-                    size: "sm"
-                }, void 0, false, {
-                    fileName: "src/components/userform/UserForm.jsx",
-                    lineNumber: 80,
-                    columnNumber: 13
-                }, this) : submitLabel
-            }, void 0, false, {
-                fileName: "src/components/userform/UserForm.jsx",
-                lineNumber: 78,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
-        fileName: "src/components/userform/UserForm.jsx",
-        lineNumber: 30,
-        columnNumber: 5
-    }, this);
-}
-_s(UserForm, "UV1SM7OZDXvQkRTWautY+hL9UDg=");
-_c = UserForm;
-UserForm.propTypes = {
-    initialValues: (0, _propTypesDefault.default).shape({
-        Username: (0, _propTypesDefault.default).string,
-        Password: (0, _propTypesDefault.default).string,
-        Email: (0, _propTypesDefault.default).string,
-        Birthday: (0, _propTypesDefault.default).string
-    }).isRequired,
-    status: (0, _propTypesDefault.default).string.isRequired,
-    error: (0, _propTypesDefault.default).string,
-    onSubmit: (0, _propTypesDefault.default).func.isRequired,
-    submitLabel: (0, _propTypesDefault.default).string.isRequired
-};
-var _c;
-$RefreshReg$(_c, "UserForm");
-
-  $parcel$ReactRefreshHelpers$ae57.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","prop-types":"7wKI2","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"b2vIG":[function(require,module,exports) {
+},{"react":"21dqq","react-redux":"62sf7","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/jsx-dev-runtime":"iTorj","../features/auth/authSlice":"kbh7b","../components/userform/UserForm":"5ZspT"}],"b2vIG":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$e910 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
