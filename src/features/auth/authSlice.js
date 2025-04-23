@@ -37,6 +37,26 @@ export const signup = createAsyncThunk(
   }
 );
 
+// async thunk for updating user details
+export const updateUser = createAsyncThunk(
+  'auth/updateUser',
+
+  async ({ Username, Password, Email, Birthday }, { getState, rejectWithValue }) => {
+    const { auth: { user } } = getState();
+    try {
+      const { data } = await api.put(`/users/${user.Username}`, {
+        Username,
+        Password,
+        Email,
+        Birthday
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 // Initialize state from localStorage if available
 const tokenFromStorage = localStorage.getItem('token');
 const userFromStorage = localStorage.getItem('user');
@@ -47,7 +67,9 @@ const initialState = {
   status: 'idle',
   error: null,
   signupStatus: 'idle',
-  signupError: null
+  signupError: null,
+  updateStatus: 'idle',
+  updateError: null
 };
 
 // initial state
@@ -81,7 +103,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, { payload }) => {
         state.status = 'failed';
-        state.error = payload.massage || 'Login failed';
+        state.error = payload.message || 'Login failed';
       })
 
       // handles the three states of the signup async thunk
@@ -96,6 +118,20 @@ const authSlice = createSlice({
         state.signupStatus = 'failed';
         state.signupError = payload.errors
           ? payload.errors.map(e => e.msg).join(', ') : payload.message || 'Signup failed';
+      })
+
+      // handles the three states of the updateUser async thunk
+      .addCase(updateUser.pending, state => {
+        state.updateStatus = 'loading';
+        state.updateError = null;
+      })
+      .addCase(updateUser.fulfilled, (state, { payload }) => {
+        state.updateStatus = 'succeeded';
+        state.user = payload;
+      })
+      .addCase(updateUser.rejected, (state, { payload }) => {
+        state.updateStatus = 'failed';
+        state.updateError = payload.message || 'Failed to update profile';
       });
   }
 });

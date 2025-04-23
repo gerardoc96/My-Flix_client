@@ -3,18 +3,18 @@ import PropTypes from 'prop-types';
 import { Form, Button, Alert, Spinner } from 'react-bootstrap';
 
 export default function UserForm({
-  initualValues,
+  initialValues,
   status,
   error,
   onSubmit,
   submitLabel,
 }) {
-  const [formData, setFormData] = useState(initualValues);
+  const [formData, setFormData] = useState(initialValues);
 
-  //Reset local form when initualValues change
+  //Reset local form when initialValues change
   useEffect(() => {
-    setFormData(initualValues);
-  }, [initualValues]);
+    setFormData(initialValues);
+  }, [initialValues]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

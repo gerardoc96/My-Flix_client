@@ -55,7 +55,7 @@ const moviesSlice = createSlice({
       })
       .addCase(getMovies.rejected, (state, { payload }) => {
         state.statusAll = 'failed';
-        state.errorAll = payload.massage || 'Could not fetch movies';
+        state.errorAll = payload.message || 'Could not fetch movies';
       })
 
       // handles the three states of the getMovie thunk
@@ -70,7 +70,7 @@ const moviesSlice = createSlice({
       })
       .addCase(getMovie.rejected, (state, { payload }) => {
         state.StatusOne = 'failed';
-        state.errorOne = payload.massage || 'Could not fetch the movie';
+        state.errorOne = payload.message || 'Could not fetch the movie';
       });
   }
 
