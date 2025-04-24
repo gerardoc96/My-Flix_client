@@ -18400,7 +18400,7 @@ const store = (0, _toolkit.configureStore)({
     }
 });
 
-},{"@reduxjs/toolkit":"fuua8","../features/auth/authSlice":"kbh7b","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../features/movies/moviesSlice":"lBL6e"}],"fuua8":[function(require,module,exports) {
+},{"@reduxjs/toolkit":"fuua8","../features/auth/authSlice":"kbh7b","../features/movies/moviesSlice":"lBL6e","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fuua8":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "ReducerType", ()=>ReducerType);
@@ -22405,6 +22405,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
 parcelHelpers.export(exports, "signup", ()=>signup);
 parcelHelpers.export(exports, "updateUser", ()=>updateUser);
+parcelHelpers.export(exports, "toggleFavorite", ()=>toggleFavorite);
 parcelHelpers.export(exports, "deleteUser", ()=>deleteUser);
 parcelHelpers.export(exports, "logout", ()=>logout);
 var _toolkit = require("@reduxjs/toolkit");
@@ -22448,6 +22449,17 @@ const updateUser = (0, _toolkit.createAsyncThunk)("auth/updateUser", async ({ Us
         return rejectWithValue(error.response?.data || error.message);
     }
 });
+const toggleFavorite = (0, _toolkit.createAsyncThunk)("auth/toggleFavorite", async (movieId, { getState, rejectWithValue })=>{
+    const { auth: { user } } = getState();
+    const method = user.FavoriteMovies.includes(movieId) ? "delete" : "post";
+    const url = `/users/${user.Username}/${movieId}`;
+    try {
+        const response = method === "post" ? await (0, _axiosDefault.default).post(url) : await (0, _axiosDefault.default).delete(url);
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
 const deleteUser = (0, _toolkit.createAsyncThunk)("auth/deleteUser", async (_, { getState, rejectWithValue })=>{
     const { auth: { user } } = getState();
     try {
@@ -22463,14 +22475,16 @@ const userFromStorage = localStorage.getItem("user");
 const initialState = {
     user: userFromStorage ? JSON.parse(userFromStorage) : null,
     token: tokenFromStorage || null,
-    LoginStatus: "idle",
-    LoginError: null,
+    status: "idle",
+    error: null,
     signupStatus: "idle",
     signupError: null,
     updateStatus: "idle",
     updateError: null,
     deleteStatus: "idle",
-    deleteError: null
+    deleteError: null,
+    favoriteStatus: "idle",
+    favoriteError: null
 };
 // initial state
 const authSlice = (0, _toolkit.createSlice)({
@@ -22489,7 +22503,7 @@ const authSlice = (0, _toolkit.createSlice)({
         builder// Login async thunk
         .addCase(login.pending, (state)=>{
             state.status = "loading";
-            state.LoginError = null;
+            state.error = null;
         }).addCase(login.fulfilled, (state, { payload })=>{
             state.status = "succeeded";
             state.user = payload.user;
@@ -22498,7 +22512,7 @@ const authSlice = (0, _toolkit.createSlice)({
             localStorage.setItem("user", JSON.stringify(payload.user));
         }).addCase(login.rejected, (state, { payload })=>{
             state.status = "failed";
-            state.LoginError = payload.message || "Login failed";
+            state.error = payload.message || "Login failed";
         })// Signup async thunk
         .addCase(signup.pending, (state)=>{
             state.signupStatus = "loading";
@@ -22518,7 +22532,18 @@ const authSlice = (0, _toolkit.createSlice)({
         }).addCase(updateUser.rejected, (state, { payload })=>{
             state.updateStatus = "failed";
             state.updateError = payload.message || "Failed to update profile";
-        })//DeleteUser async thunk
+        })// ToggleFavorite async thunk
+        .addCase(toggleFavorite.pending, (state)=>{
+            state.favoriteStatus = "loading";
+            state.favoriteError = null;
+        }).addCase(toggleFavorite.fulfilled, (state, { payload: updatedUser })=>{
+            state.favoriteStatus = "succeeded";
+            state.user = updatedUser;
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+        }).addCase(toggleFavorite.rejected, (state, { payload })=>{
+            state.favoriteStatus = "failed";
+            state.favoriteError = payload.message || payload;
+        })// DeleteUser async thunk
         .addCase(deleteUser.pending, (state)=>{
             state.deleteStatus = "loading";
             state.deleteError = null;
@@ -27344,7 +27369,7 @@ const moviesSlice = (0, _toolkit.createSlice)({
         list: [],
         currentMovie: null,
         statusAll: "idle",
-        StatusOne: "idle",
+        statusOne: "idle",
         errorAll: null,
         errorOne: null
     },
@@ -27362,14 +27387,14 @@ const moviesSlice = (0, _toolkit.createSlice)({
             state.errorAll = payload.message || "Could not fetch movies";
         })// handles the three states of the getMovie thunk
         .addCase(getMovie.pending, (state)=>{
-            state.StatusOne = "loading";
+            state.statusOne = "loading";
             state.errorOne = null;
             state.currentMovie = null;
         }).addCase(getMovie.fulfilled, (state, { payload })=>{
-            state.StatusOne = "succeeded";
+            state.statusOne = "succeeded";
             state.currentMovie = payload;
         }).addCase(getMovie.rejected, (state, { payload })=>{
-            state.StatusOne = "failed";
+            state.statusOne = "failed";
             state.errorOne = payload.message || "Could not fetch the movie";
         });
     }
@@ -38217,7 +38242,7 @@ $RefreshReg$(_c, "App");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router":"dXVwI","./pages/LoginPage":"4ZWSW","./pages/SignupPage":"kLTvH","./pages/MovieListPage":"1rZCQ","./pages/ProfilePage":"9pIbl","./components/PrivateRoute/PrivateRoute":"b2vIG","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","./pages/MovieDetailsPage":"4ZuBh","./components/navigationbar/NavigationBar":"aYU8q"}],"4ZWSW":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router":"dXVwI","./pages/LoginPage":"4ZWSW","./pages/SignupPage":"kLTvH","./pages/MovieListPage":"1rZCQ","./pages/MovieDetailsPage":"4ZuBh","./pages/ProfilePage":"9pIbl","./components/navigationbar/NavigationBar":"aYU8q","./components/PrivateRoute/PrivateRoute":"b2vIG","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"4ZWSW":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$c875 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -38378,7 +38403,7 @@ $RefreshReg$(_c, "LoginPage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","../features/auth/authSlice":"kbh7b"}],"3AD9A":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","../features/auth/authSlice":"kbh7b","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"3AD9A":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Accordion", ()=>(0, _accordionDefault.default));
@@ -45348,7 +45373,7 @@ $RefreshReg$(_c, "SignupPage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","../features/auth/authSlice":"kbh7b","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","../components/userform/UserForm":"5ZspT"}],"5ZspT":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","../features/auth/authSlice":"kbh7b","react-bootstrap":"3AD9A","../components/userform/UserForm":"5ZspT","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"5ZspT":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$ae57 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -45684,7 +45709,264 @@ $RefreshReg$(_c, "MovieListPage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","../features/movies/moviesSlice":"lBL6e","react-bootstrap":"3AD9A","react-router":"dXVwI","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"9pIbl":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","../features/movies/moviesSlice":"lBL6e","react-bootstrap":"3AD9A","react-router":"dXVwI","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"4ZuBh":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$f7e1 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$f7e1.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>MovieDetailsPage);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _reactRouter = require("react-router");
+var _reactRedux = require("react-redux");
+var _moviesSlice = require("../features/movies/moviesSlice");
+var _reactBootstrap = require("react-bootstrap");
+var _s = $RefreshSig$();
+function MovieDetailsPage() {
+    _s();
+    const { Title } = (0, _reactRouter.useParams)();
+    const dispatch = (0, _reactRedux.useDispatch)();
+    const { currentMovie: movie, statusOne: status, errorOne: error } = (0, _reactRedux.useSelector)((state)=>state.movies);
+    // toggle for Director & Genre
+    const [showGenre, setShowGenre] = (0, _react.useState)(false);
+    const [showDirector, setShowDirector] = (0, _react.useState)(false);
+    (0, _react.useEffect)(()=>{
+        dispatch((0, _moviesSlice.getMovie)(Title));
+    }, [
+        dispatch,
+        Title
+    ]);
+    if (status === "Loading") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
+            animation: "border"
+        }, void 0, false, {
+            fileName: "src/pages/MovieDetailsPage.jsx",
+            lineNumber: 28,
+            columnNumber: 9
+        }, this)
+    }, void 0, false, {
+        fileName: "src/pages/MovieDetailsPage.jsx",
+        lineNumber: 27,
+        columnNumber: 7
+    }, this);
+    if (status === "failed") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+            variant: "danger",
+            children: error || "Could not fetch the movie"
+        }, void 0, false, {
+            fileName: "src/pages/MovieDetailsPage.jsx",
+            lineNumber: 36,
+            columnNumber: 9
+        }, this)
+    }, void 0, false, {
+        fileName: "src/pages/MovieDetailsPage.jsx",
+        lineNumber: 35,
+        columnNumber: 7
+    }, this);
+    if (!movie) return null;
+    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Row), {
+            children: [
+                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Col), {
+                    children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
+                        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card).Img, {
+                            src: movie.ImagePath,
+                            alt: movie.Title
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 54,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "src/pages/MovieDetailsPage.jsx",
+                        lineNumber: 53,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "src/pages/MovieDetailsPage.jsx",
+                    lineNumber: 52,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Col), {
+                    children: [
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
+                            children: movie.Title
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 59,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                            children: movie.Description
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 60,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h5", {
+                            children: [
+                                "Genre: ",
+                                "",
+                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                    variant: "link",
+                                    onClick: ()=>setShowGenre(!showGenre),
+                                    children: movie.Genre.Name
+                                }, void 0, false, {
+                                    fileName: "src/pages/MovieDetailsPage.jsx",
+                                    lineNumber: 65,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 63,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Collapse), {
+                            in: showGenre,
+                            children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                    children: movie.Genre.Description
+                                }, void 0, false, {
+                                    fileName: "src/pages/MovieDetailsPage.jsx",
+                                    lineNumber: 74,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                lineNumber: 73,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 72,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h5", {
+                            children: [
+                                "Director: ",
+                                "",
+                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                    variant: "link",
+                                    onClick: ()=>setShowDirector(!showDirector),
+                                    children: movie.Director.Name
+                                }, void 0, false, {
+                                    fileName: "src/pages/MovieDetailsPage.jsx",
+                                    lineNumber: 81,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 79,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Collapse), {
+                            in: showDirector,
+                            children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                children: [
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                        children: [
+                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                                children: "Bio:"
+                                            }, void 0, false, {
+                                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                                lineNumber: 90,
+                                                columnNumber: 18
+                                            }, this),
+                                            " ",
+                                            movie.Director.Bio
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/pages/MovieDetailsPage.jsx",
+                                        lineNumber: 90,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                        children: [
+                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                                children: "Born:"
+                                            }, void 0, false, {
+                                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                                lineNumber: 91,
+                                                columnNumber: 18
+                                            }, this),
+                                            " ",
+                                            movie.Director.Birth
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/pages/MovieDetailsPage.jsx",
+                                        lineNumber: 91,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                        children: [
+                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                                children: "Died:"
+                                            }, void 0, false, {
+                                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                                lineNumber: 92,
+                                                columnNumber: 18
+                                            }, this),
+                                            " ",
+                                            movie.Director.Death
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/pages/MovieDetailsPage.jsx",
+                                        lineNumber: 92,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                lineNumber: 89,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "src/pages/MovieDetailsPage.jsx",
+                            lineNumber: 88,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "src/pages/MovieDetailsPage.jsx",
+                    lineNumber: 58,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "src/pages/MovieDetailsPage.jsx",
+            lineNumber: 50,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "src/pages/MovieDetailsPage.jsx",
+        lineNumber: 48,
+        columnNumber: 5
+    }, this);
+}
+_s(MovieDetailsPage, "9XBwn5Fa8iQX4yrLowZoKsqO2HA=", false, function() {
+    return [
+        (0, _reactRouter.useParams),
+        (0, _reactRedux.useDispatch),
+        (0, _reactRedux.useSelector)
+    ];
+});
+_c = MovieDetailsPage;
+var _c;
+$RefreshReg$(_c, "MovieDetailsPage");
+
+  $parcel$ReactRefreshHelpers$f7e1.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router":"dXVwI","react-redux":"62sf7","../features/movies/moviesSlice":"lBL6e","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"9pIbl":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$ed79 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -45726,9 +46008,9 @@ function ProfilePage() {
         Birthday: user.Birthday.slice(0, 10)
     };
     const isBusy = updateStatus === "loading";
-    // Redirects to login page when deltion succeeds
+    // Redirects to login page when deletion succeeds
     (0, _react.useEffect)(()=>{
-        if (deleteStatus === "succeeded") navigate("/longin");
+        if (deleteStatus === "succeeded") navigate("/login");
     }, [
         deleteStatus,
         navigate
@@ -45905,308 +46187,7 @@ $RefreshReg$(_c, "ProfilePage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"21dqq","react-redux":"62sf7","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/jsx-dev-runtime":"iTorj","../features/auth/authSlice":"kbh7b","../components/userform/UserForm":"5ZspT","react-router":"dXVwI"}],"b2vIG":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$e910 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$e910.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "default", ()=>PrivateRoute);
-var _jsxDevRuntime = require("react/jsx-dev-runtime");
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-var _reactRouter = require("react-router");
-var _reactRedux = require("react-redux");
-var _s = $RefreshSig$();
-function PrivateRoute({ children }) {
-    _s();
-    const token = (0, _reactRedux.useSelector)((state)=>state.auth.token);
-    return token ? children : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactRouter.Navigate), {
-        to: "/login",
-        replace: true
-    }, void 0, false, {
-        fileName: "src/components/PrivateRoute/PrivateRoute.jsx",
-        lineNumber: 8,
-        columnNumber: 29
-    }, this);
-}
-_s(PrivateRoute, "bD5+gKbiITcJRDYAIJK4ZSEgato=", false, function() {
-    return [
-        (0, _reactRedux.useSelector)
-    ];
-});
-_c = PrivateRoute;
-var _c;
-$RefreshReg$(_c, "PrivateRoute");
-
-  $parcel$ReactRefreshHelpers$e910.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router":"dXVwI","react-redux":"62sf7","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"4ZuBh":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$f7e1 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$f7e1.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "default", ()=>MovieDetailsPage);
-var _jsxDevRuntime = require("react/jsx-dev-runtime");
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-var _reactRouter = require("react-router");
-var _reactRedux = require("react-redux");
-var _moviesSlice = require("../features/movies/moviesSlice");
-var _reactBootstrap = require("react-bootstrap");
-var _s = $RefreshSig$();
-function MovieDetailsPage() {
-    _s();
-    const { Title } = (0, _reactRouter.useParams)();
-    const navigate = (0, _reactRouter.useNavigate)();
-    const dispatch = (0, _reactRedux.useDispatch)();
-    const { currentMovie: movie, statusOne: status, errorOne: error } = (0, _reactRedux.useSelector)((state)=>state.movies);
-    // toggle for Director & Genre
-    const [showGenre, setShowGenre] = (0, _react.useState)(false);
-    const [showDirector, setShowDirector] = (0, _react.useState)(false);
-    (0, _react.useEffect)(()=>{
-        dispatch((0, _moviesSlice.getMovie)(Title));
-    }, [
-        dispatch,
-        Title
-    ]);
-    if (status === "Loading") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
-        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
-            animation: "border"
-        }, void 0, false, {
-            fileName: "src/pages/MovieDetailsPage.jsx",
-            lineNumber: 29,
-            columnNumber: 9
-        }, this)
-    }, void 0, false, {
-        fileName: "src/pages/MovieDetailsPage.jsx",
-        lineNumber: 28,
-        columnNumber: 7
-    }, this);
-    if (status === "failed") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
-        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
-            variant: "danger",
-            children: error || "Could not fetch the movie"
-        }, void 0, false, {
-            fileName: "src/pages/MovieDetailsPage.jsx",
-            lineNumber: 37,
-            columnNumber: 9
-        }, this)
-    }, void 0, false, {
-        fileName: "src/pages/MovieDetailsPage.jsx",
-        lineNumber: 36,
-        columnNumber: 7
-    }, this);
-    if (!movie) return null;
-    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
-        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Row), {
-            children: [
-                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Col), {
-                    children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
-                        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card).Img, {
-                            src: movie.ImagePath,
-                            alt: movie.Title
-                        }, void 0, false, {
-                            fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 55,
-                            columnNumber: 13
-                        }, this)
-                    }, void 0, false, {
-                        fileName: "src/pages/MovieDetailsPage.jsx",
-                        lineNumber: 54,
-                        columnNumber: 11
-                    }, this)
-                }, void 0, false, {
-                    fileName: "src/pages/MovieDetailsPage.jsx",
-                    lineNumber: 53,
-                    columnNumber: 9
-                }, this),
-                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Col), {
-                    children: [
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
-                            children: movie.Title
-                        }, void 0, false, {
-                            fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 60,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                            children: movie.Description
-                        }, void 0, false, {
-                            fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 61,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h5", {
-                            children: [
-                                "Genre: ",
-                                "",
-                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
-                                    variant: "link",
-                                    onClick: ()=>setShowGenre(!showGenre),
-                                    children: movie.Genre.Name
-                                }, void 0, false, {
-                                    fileName: "src/pages/MovieDetailsPage.jsx",
-                                    lineNumber: 66,
-                                    columnNumber: 13
-                                }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 64,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Collapse), {
-                            in: showGenre,
-                            children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                    children: movie.Genre.Description
-                                }, void 0, false, {
-                                    fileName: "src/pages/MovieDetailsPage.jsx",
-                                    lineNumber: 75,
-                                    columnNumber: 15
-                                }, this)
-                            }, void 0, false, {
-                                fileName: "src/pages/MovieDetailsPage.jsx",
-                                lineNumber: 74,
-                                columnNumber: 13
-                            }, this)
-                        }, void 0, false, {
-                            fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 73,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h5", {
-                            children: [
-                                "Director: ",
-                                "",
-                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
-                                    variant: "link",
-                                    onClick: ()=>setShowDirector(!showDirector),
-                                    children: movie.Director.Name
-                                }, void 0, false, {
-                                    fileName: "src/pages/MovieDetailsPage.jsx",
-                                    lineNumber: 82,
-                                    columnNumber: 13
-                                }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 80,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Collapse), {
-                            in: showDirector,
-                            children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                children: [
-                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                        children: [
-                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
-                                                children: "Bio:"
-                                            }, void 0, false, {
-                                                fileName: "src/pages/MovieDetailsPage.jsx",
-                                                lineNumber: 91,
-                                                columnNumber: 18
-                                            }, this),
-                                            " ",
-                                            movie.Director.Bio
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "src/pages/MovieDetailsPage.jsx",
-                                        lineNumber: 91,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                        children: [
-                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
-                                                children: "Born:"
-                                            }, void 0, false, {
-                                                fileName: "src/pages/MovieDetailsPage.jsx",
-                                                lineNumber: 92,
-                                                columnNumber: 18
-                                            }, this),
-                                            " ",
-                                            movie.Director.Birth
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "src/pages/MovieDetailsPage.jsx",
-                                        lineNumber: 92,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                        children: [
-                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
-                                                children: "Died:"
-                                            }, void 0, false, {
-                                                fileName: "src/pages/MovieDetailsPage.jsx",
-                                                lineNumber: 93,
-                                                columnNumber: 18
-                                            }, this),
-                                            " ",
-                                            movie.Director.Death
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "src/pages/MovieDetailsPage.jsx",
-                                        lineNumber: 93,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "src/pages/MovieDetailsPage.jsx",
-                                lineNumber: 90,
-                                columnNumber: 13
-                            }, this)
-                        }, void 0, false, {
-                            fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 89,
-                            columnNumber: 11
-                        }, this)
-                    ]
-                }, void 0, true, {
-                    fileName: "src/pages/MovieDetailsPage.jsx",
-                    lineNumber: 59,
-                    columnNumber: 9
-                }, this)
-            ]
-        }, void 0, true, {
-            fileName: "src/pages/MovieDetailsPage.jsx",
-            lineNumber: 51,
-            columnNumber: 7
-        }, this)
-    }, void 0, false, {
-        fileName: "src/pages/MovieDetailsPage.jsx",
-        lineNumber: 49,
-        columnNumber: 5
-    }, this);
-}
-_s(MovieDetailsPage, "2KltM4cyDC5P4SytfCvKL6COtTg=", false, function() {
-    return [
-        (0, _reactRouter.useParams),
-        (0, _reactRouter.useNavigate),
-        (0, _reactRedux.useDispatch),
-        (0, _reactRedux.useSelector)
-    ];
-});
-_c = MovieDetailsPage;
-var _c;
-$RefreshReg$(_c, "MovieDetailsPage");
-
-  $parcel$ReactRefreshHelpers$f7e1.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router":"dXVwI","react-redux":"62sf7","../features/movies/moviesSlice":"lBL6e","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"aYU8q":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","react-bootstrap":"3AD9A","../features/auth/authSlice":"kbh7b","../components/userform/UserForm":"5ZspT","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"aYU8q":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$eae6 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -46367,6 +46348,48 @@ $RefreshReg$(_c, "NavigationBar");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-bootstrap":"3AD9A","react-router":"dXVwI","react-redux":"62sf7","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","../../features/auth/authSlice":"kbh7b"}]},["4s3Ar","1xC6H","d8Dch"], "d8Dch", "parcelRequiref822")
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-bootstrap":"3AD9A","react-router":"dXVwI","react-redux":"62sf7","../../features/auth/authSlice":"kbh7b","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"b2vIG":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$e910 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$e910.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>PrivateRoute);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _reactRouter = require("react-router");
+var _reactRedux = require("react-redux");
+var _s = $RefreshSig$();
+function PrivateRoute({ children }) {
+    _s();
+    const token = (0, _reactRedux.useSelector)((state)=>state.auth.token);
+    return token ? children : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactRouter.Navigate), {
+        to: "/login",
+        replace: true
+    }, void 0, false, {
+        fileName: "src/components/PrivateRoute/PrivateRoute.jsx",
+        lineNumber: 8,
+        columnNumber: 29
+    }, this);
+}
+_s(PrivateRoute, "bD5+gKbiITcJRDYAIJK4ZSEgato=", false, function() {
+    return [
+        (0, _reactRedux.useSelector)
+    ];
+});
+_c = PrivateRoute;
+var _c;
+$RefreshReg$(_c, "PrivateRoute");
+
+  $parcel$ReactRefreshHelpers$e910.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router":"dXVwI","react-redux":"62sf7","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}]},["4s3Ar","1xC6H","d8Dch"], "d8Dch", "parcelRequiref822")
 
 //# sourceMappingURL=index.b4b6dfad.js.map

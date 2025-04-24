@@ -57,6 +57,25 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+//Async thunk adding/removing movies from favorite
+export const toggleFavorite = createAsyncThunk(
+  'auth/toggleFavorite',
+
+  async (movieId, { getState, rejectWithValue }) => {
+    const { auth: { user } } = getState();
+
+    const method = user.FavoriteMovies.includes(movieId) ? 'delete' : 'post';
+    const url = `/users/${user.Username}/${movieId}`;
+
+    try {
+      const response = method === 'post' ? await api.post(url) : await api.delete(url);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 //Async thunk for deleting the user's profile
 export const deleteUser = createAsyncThunk(
   'auth/deleteUser',
@@ -79,14 +98,16 @@ const userFromStorage = localStorage.getItem('user');
 const initialState = {
   user: userFromStorage ? JSON.parse(userFromStorage) : null,
   token: tokenFromStorage || null,
-  LoginStatus: 'idle',
-  LoginError: null,
+  status: 'idle',
+  error: null,
   signupStatus: 'idle',
   signupError: null,
   updateStatus: 'idle',
   updateError: null,
   deleteStatus: 'idle',
-  deleteError: null
+  deleteError: null,
+  favoriteStatus: 'idle',
+  favoriteError: null
 };
 
 // initial state
@@ -109,7 +130,7 @@ const authSlice = createSlice({
       // Login async thunk
       .addCase(login.pending, (state) => {
         state.status = 'loading';
-        state.LoginError = null;
+        state.error = null;
       })
       .addCase(login.fulfilled, (state, { payload }) => {
         state.status = 'succeeded';
@@ -120,7 +141,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, { payload }) => {
         state.status = 'failed';
-        state.LoginError = payload.message || 'Login failed';
+        state.error = payload.message || 'Login failed';
       })
 
       // Signup async thunk
@@ -151,7 +172,22 @@ const authSlice = createSlice({
         state.updateError = payload.message || 'Failed to update profile';
       })
 
-      //DeleteUser async thunk
+      // ToggleFavorite async thunk
+      .addCase(toggleFavorite.pending, state => {
+        state.favoriteStatus = 'loading';
+        state.favoriteError = null;
+      })
+      .addCase(toggleFavorite.fulfilled, (state, { payload: updatedUser }) => {
+        state.favoriteStatus = 'succeeded';
+        state.user = updatedUser;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      })
+      .addCase(toggleFavorite.rejected, (state, { payload }) => {
+        state.favoriteStatus = 'failed';
+        state.favoriteError = payload.message || payload;
+      })
+
+      // DeleteUser async thunk
       .addCase(deleteUser.pending, (state) => {
         state.deleteStatus = 'loading';
         state.deleteError = null;
