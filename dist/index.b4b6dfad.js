@@ -22405,6 +22405,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
 parcelHelpers.export(exports, "signup", ()=>signup);
 parcelHelpers.export(exports, "updateUser", ()=>updateUser);
+parcelHelpers.export(exports, "deleteUser", ()=>deleteUser);
 parcelHelpers.export(exports, "logout", ()=>logout);
 var _toolkit = require("@reduxjs/toolkit");
 var _axios = require("../../api/axios");
@@ -22447,18 +22448,29 @@ const updateUser = (0, _toolkit.createAsyncThunk)("auth/updateUser", async ({ Us
         return rejectWithValue(error.response?.data || error.message);
     }
 });
+const deleteUser = (0, _toolkit.createAsyncThunk)("auth/deleteUser", async (_, { getState, rejectWithValue })=>{
+    const { auth: { user } } = getState();
+    try {
+        await (0, _axiosDefault.default).delete(`/users/${user.Username}`);
+        return;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
 // Initialize state from localStorage if available
 const tokenFromStorage = localStorage.getItem("token");
 const userFromStorage = localStorage.getItem("user");
 const initialState = {
     user: userFromStorage ? JSON.parse(userFromStorage) : null,
     token: tokenFromStorage || null,
-    status: "idle",
-    error: null,
+    LoginStatus: "idle",
+    LoginError: null,
     signupStatus: "idle",
     signupError: null,
     updateStatus: "idle",
-    updateError: null
+    updateError: null,
+    deleteStatus: "idle",
+    deleteError: null
 };
 // initial state
 const authSlice = (0, _toolkit.createSlice)({
@@ -22474,10 +22486,10 @@ const authSlice = (0, _toolkit.createSlice)({
         }
     },
     extraReducers: (builder)=>{
-        builder// handles the three states of the login async thunk
+        builder// Login async thunk
         .addCase(login.pending, (state)=>{
             state.status = "loading";
-            state.error = null;
+            state.LoginError = null;
         }).addCase(login.fulfilled, (state, { payload })=>{
             state.status = "succeeded";
             state.user = payload.user;
@@ -22486,8 +22498,8 @@ const authSlice = (0, _toolkit.createSlice)({
             localStorage.setItem("user", JSON.stringify(payload.user));
         }).addCase(login.rejected, (state, { payload })=>{
             state.status = "failed";
-            state.error = payload.message || "Login failed";
-        })// handles the three states of the signup async thunk
+            state.LoginError = payload.message || "Login failed";
+        })// Signup async thunk
         .addCase(signup.pending, (state)=>{
             state.signupStatus = "loading";
             state.signupError = null;
@@ -22496,7 +22508,7 @@ const authSlice = (0, _toolkit.createSlice)({
         }).addCase(signup.rejected, (state, { payload })=>{
             state.signupStatus = "failed";
             state.signupError = payload.errors ? payload.errors.map((e)=>e.msg).join(", ") : payload.message || "Signup failed";
-        })// handles the three states of the updateUser async thunk
+        })// UpdateUser async thunk
         .addCase(updateUser.pending, (state)=>{
             state.updateStatus = "loading";
             state.updateError = null;
@@ -22506,6 +22518,19 @@ const authSlice = (0, _toolkit.createSlice)({
         }).addCase(updateUser.rejected, (state, { payload })=>{
             state.updateStatus = "failed";
             state.updateError = payload.message || "Failed to update profile";
+        })//DeleteUser async thunk
+        .addCase(deleteUser.pending, (state)=>{
+            state.deleteStatus = "loading";
+            state.deleteError = null;
+        }).addCase(deleteUser.fulfilled, (state)=>{
+            state.deleteStatus = "succeeded";
+            state.user = null;
+            state.token = null;
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+        }).addCase(deleteUser.rejected, (state, { payload })=>{
+            state.deleteStatus = "failed";
+            state.deleteError = payload.message || "Failed to delete profile";
         });
     }
 });
@@ -45673,6 +45698,7 @@ var _jsxDevRuntime = require("react/jsx-dev-runtime");
 var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 var _reactRedux = require("react-redux");
+var _reactRouter = require("react-router");
 var _reactBootstrap = require("react-bootstrap");
 var _authSlice = require("../features/auth/authSlice");
 var _userForm = require("../components/userform/UserForm");
@@ -45681,13 +45707,17 @@ var _s = $RefreshSig$();
 function ProfilePage() {
     _s();
     const dispatch = (0, _reactRedux.useDispatch)();
-    const { user, updateStatus, updateError } = (0, _reactRedux.useSelector)((state)=>state.auth);
+    const navigate = (0, _reactRouter.useNavigate)();
+    const { user, updateStatus, updateError, deleteStatus, deleteError } = (0, _reactRedux.useSelector)((state)=>state.auth);
     // Toggle view vs edit
     const [isEditing, setIsEditing] = (0, _react.useState)(false);
     const handleUpdate = (formData)=>{
         dispatch((0, _authSlice.updateUser)(formData)).then((action)=>{
             if (action.type === "auth/updateUser/fulfilled") setIsEditing(false);
         });
+    };
+    const handleDelete = ()=>{
+        if (window.confirm("Are you sure you want to delete your profiel? This action cannot be undone.")) dispatch((0, _authSlice.deleteUser)());
     };
     const forminitialValues = {
         Username: user.Username,
@@ -45696,6 +45726,13 @@ function ProfilePage() {
         Birthday: user.Birthday.slice(0, 10)
     };
     const isBusy = updateStatus === "loading";
+    // Redirects to login page when deltion succeeds
+    (0, _react.useEffect)(()=>{
+        if (deleteStatus === "succeeded") navigate("/longin");
+    }, [
+        deleteStatus,
+        navigate
+    ]);
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
         children: [
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -45704,7 +45741,7 @@ function ProfilePage() {
                         children: "Profile"
                     }, void 0, false, {
                         fileName: "src/pages/ProfilePage.jsx",
-                        lineNumber: 34,
+                        lineNumber: 49,
                         columnNumber: 9
                     }, this),
                     isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
@@ -45713,20 +45750,38 @@ function ProfilePage() {
                         children: "Cancel"
                     }, void 0, false, {
                         fileName: "src/pages/ProfilePage.jsx",
-                        lineNumber: 36,
+                        lineNumber: 51,
                         columnNumber: 11
-                    }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
-                        onClick: ()=>setIsEditing(true),
-                        children: "Edit Profile"
-                    }, void 0, false, {
+                    }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                        children: [
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                onClick: ()=>setIsEditing(true),
+                                children: "Edit Profile"
+                            }, void 0, false, {
+                                fileName: "src/pages/ProfilePage.jsx",
+                                lineNumber: 57,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                variant: "danger",
+                                onClick: handleDelete,
+                                disabled: deleteStatus === "loading",
+                                children: deleteStatus === "loading" ? "Deleting..." : "Delete Profile"
+                            }, void 0, false, {
+                                fileName: "src/pages/ProfilePage.jsx",
+                                lineNumber: 60,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
                         fileName: "src/pages/ProfilePage.jsx",
-                        lineNumber: 41,
+                        lineNumber: 56,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 33,
+                lineNumber: 48,
                 columnNumber: 7
             }, this),
             isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _userFormDefault.default), {
@@ -45737,7 +45792,7 @@ function ProfilePage() {
                 submitLabel: isBusy ? "Saving..." : "Save Changes"
             }, void 0, false, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 48,
+                lineNumber: 69,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
                 children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup), {
@@ -45749,7 +45804,7 @@ function ProfilePage() {
                                     children: "Username:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 60,
+                                    lineNumber: 81,
                                     columnNumber: 15
                                 }, this),
                                 " ",
@@ -45757,7 +45812,7 @@ function ProfilePage() {
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 59,
+                            lineNumber: 80,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
@@ -45766,7 +45821,7 @@ function ProfilePage() {
                                     children: "Email:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 64,
+                                    lineNumber: 85,
                                     columnNumber: 15
                                 }, this),
                                 " ",
@@ -45774,7 +45829,7 @@ function ProfilePage() {
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 63,
+                            lineNumber: 84,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
@@ -45783,7 +45838,7 @@ function ProfilePage() {
                                     children: "Birthday:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 68,
+                                    lineNumber: 89,
                                     columnNumber: 15
                                 }, this),
                                 " ",
@@ -45791,25 +45846,9 @@ function ProfilePage() {
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 67,
+                            lineNumber: 88,
                             columnNumber: 13
                         }, this)
-                    ]
-                }, void 0, true, {
-                    fileName: "src/pages/ProfilePage.jsx",
-                    lineNumber: 57,
-                    columnNumber: 11
-                }, this)
-            }, void 0, false, {
-                fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 56,
-                columnNumber: 9
-            }, this),
-            updateStatus === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                    children: [
-                        "Error: ",
-                        updateEror
                     ]
                 }, void 0, true, {
                     fileName: "src/pages/ProfilePage.jsx",
@@ -45820,17 +45859,40 @@ function ProfilePage() {
                 fileName: "src/pages/ProfilePage.jsx",
                 lineNumber: 77,
                 columnNumber: 9
+            }, this),
+            updateStatus === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+                variant: "danger",
+                children: [
+                    "Update failed: ",
+                    updateError
+                ]
+            }, void 0, true, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 98,
+                columnNumber: 9
+            }, this),
+            deleteStatus === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+                variant: "danger",
+                children: [
+                    "Delete failed: ",
+                    deleteError
+                ]
+            }, void 0, true, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 102,
+                columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/pages/ProfilePage.jsx",
-        lineNumber: 32,
+        lineNumber: 47,
         columnNumber: 5
     }, this);
 }
-_s(ProfilePage, "a1Yt2bqG8iX7FPNOib9Z1BomiNY=", false, function() {
+_s(ProfilePage, "8idlWHnDlmjeJ8oMQWpWCbYplQM=", false, function() {
     return [
         (0, _reactRedux.useDispatch),
+        (0, _reactRouter.useNavigate),
         (0, _reactRedux.useSelector)
     ];
 });
@@ -45843,7 +45905,7 @@ $RefreshReg$(_c, "ProfilePage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"21dqq","react-redux":"62sf7","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/jsx-dev-runtime":"iTorj","../features/auth/authSlice":"kbh7b","../components/userform/UserForm":"5ZspT"}],"b2vIG":[function(require,module,exports) {
+},{"react":"21dqq","react-redux":"62sf7","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/jsx-dev-runtime":"iTorj","../features/auth/authSlice":"kbh7b","../components/userform/UserForm":"5ZspT","react-router":"dXVwI"}],"b2vIG":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$e910 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;

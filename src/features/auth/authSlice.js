@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/axios';
 
-// async thunk for login
+// Async thunk for login
 export const login = createAsyncThunk(
   'auth/login',
 
@@ -18,7 +18,7 @@ export const login = createAsyncThunk(
   }
 );
 
-// async thunk for signup
+// Async thunk for signup
 export const signup = createAsyncThunk(
   'auth/signup',
 
@@ -37,7 +37,7 @@ export const signup = createAsyncThunk(
   }
 );
 
-// async thunk for updating user details
+// Async thunk for updating user details
 export const updateUser = createAsyncThunk(
   'auth/updateUser',
 
@@ -57,6 +57,21 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+//Async thunk for deleting the user's profile
+export const deleteUser = createAsyncThunk(
+  'auth/deleteUser',
+
+  async (_, { getState, rejectWithValue }) => {
+    const { auth: { user } } = getState();
+    try {
+      await api.delete(`/users/${user.Username}`);
+      return;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 // Initialize state from localStorage if available
 const tokenFromStorage = localStorage.getItem('token');
 const userFromStorage = localStorage.getItem('user');
@@ -64,12 +79,14 @@ const userFromStorage = localStorage.getItem('user');
 const initialState = {
   user: userFromStorage ? JSON.parse(userFromStorage) : null,
   token: tokenFromStorage || null,
-  status: 'idle',
-  error: null,
+  LoginStatus: 'idle',
+  LoginError: null,
   signupStatus: 'idle',
   signupError: null,
   updateStatus: 'idle',
-  updateError: null
+  updateError: null,
+  deleteStatus: 'idle',
+  deleteError: null
 };
 
 // initial state
@@ -89,10 +106,10 @@ const authSlice = createSlice({
 
   extraReducers: builder => {
     builder
-      // handles the three states of the login async thunk
+      // Login async thunk
       .addCase(login.pending, (state) => {
         state.status = 'loading';
-        state.error = null;
+        state.LoginError = null;
       })
       .addCase(login.fulfilled, (state, { payload }) => {
         state.status = 'succeeded';
@@ -103,10 +120,10 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, { payload }) => {
         state.status = 'failed';
-        state.error = payload.message || 'Login failed';
+        state.LoginError = payload.message || 'Login failed';
       })
 
-      // handles the three states of the signup async thunk
+      // Signup async thunk
       .addCase(signup.pending, (state) => {
         state.signupStatus = 'loading';
         state.signupError = null;
@@ -120,7 +137,7 @@ const authSlice = createSlice({
           ? payload.errors.map(e => e.msg).join(', ') : payload.message || 'Signup failed';
       })
 
-      // handles the three states of the updateUser async thunk
+      // UpdateUser async thunk
       .addCase(updateUser.pending, state => {
         state.updateStatus = 'loading';
         state.updateError = null;
@@ -132,6 +149,23 @@ const authSlice = createSlice({
       .addCase(updateUser.rejected, (state, { payload }) => {
         state.updateStatus = 'failed';
         state.updateError = payload.message || 'Failed to update profile';
+      })
+
+      //DeleteUser async thunk
+      .addCase(deleteUser.pending, (state) => {
+        state.deleteStatus = 'loading';
+        state.deleteError = null;
+      })
+      .addCase(deleteUser.fulfilled, (state) => {
+        state.deleteStatus = 'succeeded';
+        state.user = null;
+        state.token = null;
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      })
+      .addCase(deleteUser.rejected, (state, { payload }) => {
+        state.deleteStatus = 'failed';
+        state.deleteError = payload.message || 'Failed to delete profile';
       });
   }
 });

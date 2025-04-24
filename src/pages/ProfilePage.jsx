@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Container, Card, ListGroup, Button, } from 'react-bootstrap';
-import { updateUser } from '../features/auth/authSlice';
+import { useNavigate } from 'react-router';
+import { Container, Card, ListGroup, Button, Alert } from 'react-bootstrap';
+import { updateUser, deleteUser } from '../features/auth/authSlice';
 import UserForm from '../components/userform/UserForm';
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
-  const { user, updateStatus, updateError } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const { user, updateStatus, updateError, deleteStatus, deleteError } = useSelector((state) => state.auth);
 
   // Toggle view vs edit
   const [isEditing, setIsEditing] = useState(false);
@@ -19,6 +21,12 @@ export default function ProfilePage() {
     });
   };
 
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete your profiel? This action cannot be undone.')) {
+      dispatch(deleteUser());
+    }
+  };
+
   const forminitialValues = {
     Username: user.Username,
     Password: '',
@@ -27,6 +35,13 @@ export default function ProfilePage() {
   };
 
   const isBusy = updateStatus === 'loading';
+
+  // Redirects to login page when deltion succeeds
+  useEffect(() => {
+    if (deleteStatus === 'succeeded') {
+      navigate('/longin');
+    }
+  }, [deleteStatus, navigate]);
 
   return (
     <Container>
@@ -38,9 +53,15 @@ export default function ProfilePage() {
             Cancel
           </Button>
         ) : (
-          <Button onClick={() => setIsEditing(true)}>
-            Edit Profile
-          </Button>
+          <div>
+            <Button onClick={() => setIsEditing(true)}>
+              Edit Profile
+            </Button>
+            <Button variant='danger' onClick={handleDelete}
+              disabled={deleteStatus === 'loading'}>
+              {deleteStatus === 'loading' ? 'Deleting...' : 'Delete Profile'}
+            </Button>
+          </div>
         )}
       </div>
 
@@ -74,9 +95,11 @@ export default function ProfilePage() {
       )}
 
       {updateStatus === 'failed' && (
-        <div>
-          <p>Error: {updateEror}</p>
-        </div>
+        <Alert variant='danger'>Update failed: {updateError}</Alert>
+      )}
+
+      {deleteStatus === 'failed' && (
+        <Alert variant='danger'>Delete failed: {deleteError}</Alert>
       )}
     </Container>
   );
