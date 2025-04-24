@@ -22405,6 +22405,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
 parcelHelpers.export(exports, "signup", ()=>signup);
 parcelHelpers.export(exports, "updateUser", ()=>updateUser);
+parcelHelpers.export(exports, "toggleFavorite", ()=>toggleFavorite);
 parcelHelpers.export(exports, "deleteUser", ()=>deleteUser);
 parcelHelpers.export(exports, "logout", ()=>logout);
 var _toolkit = require("@reduxjs/toolkit");
@@ -22448,6 +22449,17 @@ const updateUser = (0, _toolkit.createAsyncThunk)("auth/updateUser", async ({ Us
         return rejectWithValue(error.response?.data || error.message);
     }
 });
+const toggleFavorite = (0, _toolkit.createAsyncThunk)("auth/toggleFavorite", async (movieId, { getState, rejectWithValue })=>{
+    const { auth: { user } } = getState();
+    const method = user.FavoriteMovies.includes(movieId) ? "delete" : "post";
+    const url = `/users/${user.Username}/${movieId}`;
+    try {
+        const response = method === "post" ? await (0, _axiosDefault.default).post(url) : await (0, _axiosDefault.default).delete(url);
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
 const deleteUser = (0, _toolkit.createAsyncThunk)("auth/deleteUser", async (_, { getState, rejectWithValue })=>{
     const { auth: { user } } = getState();
     try {
@@ -22470,7 +22482,9 @@ const initialState = {
     updateStatus: "idle",
     updateError: null,
     deleteStatus: "idle",
-    deleteError: null
+    deleteError: null,
+    favoriteStatus: "idle",
+    favoriteError: null
 };
 // initial state
 const authSlice = (0, _toolkit.createSlice)({
@@ -22518,7 +22532,18 @@ const authSlice = (0, _toolkit.createSlice)({
         }).addCase(updateUser.rejected, (state, { payload })=>{
             state.updateStatus = "failed";
             state.updateError = payload.message || "Failed to update profile";
-        })//DeleteUser async thunk
+        })// ToggleFavorite async thunk
+        .addCase(toggleFavorite.pending, (state)=>{
+            state.favoriteStatus = "loading";
+            state.favoriteError = null;
+        }).addCase(toggleFavorite.fulfilled, (state, { payload: updatedUser })=>{
+            state.favoriteStatus = "succeeded";
+            state.user = updatedUser;
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+        }).addCase(toggleFavorite.rejected, (state, { payload })=>{
+            state.favoriteStatus = "failed";
+            state.favoriteError = payload.message || payload;
+        })// DeleteUser async thunk
         .addCase(deleteUser.pending, (state)=>{
             state.deleteStatus = "loading";
             state.deleteError = null;
@@ -45968,7 +45993,6 @@ var _s = $RefreshSig$();
 function MovieDetailsPage() {
     _s();
     const { Title } = (0, _reactRouter.useParams)();
-    const navigate = (0, _reactRouter.useNavigate)();
     const dispatch = (0, _reactRedux.useDispatch)();
     const { currentMovie: movie, statusOne: status, errorOne: error } = (0, _reactRedux.useSelector)((state)=>state.movies);
     // toggle for Director & Genre
@@ -45985,12 +46009,12 @@ function MovieDetailsPage() {
             animation: "border"
         }, void 0, false, {
             fileName: "src/pages/MovieDetailsPage.jsx",
-            lineNumber: 29,
+            lineNumber: 28,
             columnNumber: 9
         }, this)
     }, void 0, false, {
         fileName: "src/pages/MovieDetailsPage.jsx",
-        lineNumber: 28,
+        lineNumber: 27,
         columnNumber: 7
     }, this);
     if (status === "failed") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
@@ -45999,12 +46023,12 @@ function MovieDetailsPage() {
             children: error || "Could not fetch the movie"
         }, void 0, false, {
             fileName: "src/pages/MovieDetailsPage.jsx",
-            lineNumber: 37,
+            lineNumber: 36,
             columnNumber: 9
         }, this)
     }, void 0, false, {
         fileName: "src/pages/MovieDetailsPage.jsx",
-        lineNumber: 36,
+        lineNumber: 35,
         columnNumber: 7
     }, this);
     if (!movie) return null;
@@ -46018,17 +46042,17 @@ function MovieDetailsPage() {
                             alt: movie.Title
                         }, void 0, false, {
                             fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 55,
+                            lineNumber: 54,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/pages/MovieDetailsPage.jsx",
-                        lineNumber: 54,
+                        lineNumber: 53,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/pages/MovieDetailsPage.jsx",
-                    lineNumber: 53,
+                    lineNumber: 52,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Col), {
@@ -46037,14 +46061,14 @@ function MovieDetailsPage() {
                             children: movie.Title
                         }, void 0, false, {
                             fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 60,
+                            lineNumber: 59,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
                             children: movie.Description
                         }, void 0, false, {
                             fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 61,
+                            lineNumber: 60,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h5", {
@@ -46057,13 +46081,13 @@ function MovieDetailsPage() {
                                     children: movie.Genre.Name
                                 }, void 0, false, {
                                     fileName: "src/pages/MovieDetailsPage.jsx",
-                                    lineNumber: 66,
+                                    lineNumber: 65,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 64,
+                            lineNumber: 63,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Collapse), {
@@ -46073,17 +46097,17 @@ function MovieDetailsPage() {
                                     children: movie.Genre.Description
                                 }, void 0, false, {
                                     fileName: "src/pages/MovieDetailsPage.jsx",
-                                    lineNumber: 75,
+                                    lineNumber: 74,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "src/pages/MovieDetailsPage.jsx",
-                                lineNumber: 74,
+                                lineNumber: 73,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 73,
+                            lineNumber: 72,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h5", {
@@ -46096,13 +46120,13 @@ function MovieDetailsPage() {
                                     children: movie.Director.Name
                                 }, void 0, false, {
                                     fileName: "src/pages/MovieDetailsPage.jsx",
-                                    lineNumber: 82,
+                                    lineNumber: 81,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 80,
+                            lineNumber: 79,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Collapse), {
@@ -46115,11 +46139,28 @@ function MovieDetailsPage() {
                                                 children: "Bio:"
                                             }, void 0, false, {
                                                 fileName: "src/pages/MovieDetailsPage.jsx",
-                                                lineNumber: 91,
+                                                lineNumber: 90,
                                                 columnNumber: 18
                                             }, this),
                                             " ",
                                             movie.Director.Bio
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/pages/MovieDetailsPage.jsx",
+                                        lineNumber: 90,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                        children: [
+                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                                children: "Born:"
+                                            }, void 0, false, {
+                                                fileName: "src/pages/MovieDetailsPage.jsx",
+                                                lineNumber: 91,
+                                                columnNumber: 18
+                                            }, this),
+                                            " ",
+                                            movie.Director.Birth
                                         ]
                                     }, void 0, true, {
                                         fileName: "src/pages/MovieDetailsPage.jsx",
@@ -46129,27 +46170,10 @@ function MovieDetailsPage() {
                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
                                         children: [
                                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
-                                                children: "Born:"
-                                            }, void 0, false, {
-                                                fileName: "src/pages/MovieDetailsPage.jsx",
-                                                lineNumber: 92,
-                                                columnNumber: 18
-                                            }, this),
-                                            " ",
-                                            movie.Director.Birth
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "src/pages/MovieDetailsPage.jsx",
-                                        lineNumber: 92,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
-                                        children: [
-                                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
                                                 children: "Died:"
                                             }, void 0, false, {
                                                 fileName: "src/pages/MovieDetailsPage.jsx",
-                                                lineNumber: 93,
+                                                lineNumber: 92,
                                                 columnNumber: 18
                                             }, this),
                                             " ",
@@ -46157,42 +46181,41 @@ function MovieDetailsPage() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "src/pages/MovieDetailsPage.jsx",
-                                        lineNumber: 93,
+                                        lineNumber: 92,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "src/pages/MovieDetailsPage.jsx",
-                                lineNumber: 90,
+                                lineNumber: 89,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "src/pages/MovieDetailsPage.jsx",
-                            lineNumber: 89,
+                            lineNumber: 88,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/pages/MovieDetailsPage.jsx",
-                    lineNumber: 59,
+                    lineNumber: 58,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "src/pages/MovieDetailsPage.jsx",
-            lineNumber: 51,
+            lineNumber: 50,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "src/pages/MovieDetailsPage.jsx",
-        lineNumber: 49,
+        lineNumber: 48,
         columnNumber: 5
     }, this);
 }
-_s(MovieDetailsPage, "2KltM4cyDC5P4SytfCvKL6COtTg=", false, function() {
+_s(MovieDetailsPage, "9XBwn5Fa8iQX4yrLowZoKsqO2HA=", false, function() {
     return [
         (0, _reactRouter.useParams),
-        (0, _reactRouter.useNavigate),
         (0, _reactRedux.useDispatch),
         (0, _reactRedux.useSelector)
     ];
