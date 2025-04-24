@@ -36,10 +36,10 @@ export default function ProfilePage() {
 
   const isBusy = updateStatus === 'loading';
 
-  // Redirects to login page when deltion succeeds
+  // Redirects to login page when deletion succeeds
   useEffect(() => {
     if (deleteStatus === 'succeeded') {
-      navigate('/longin');
+      navigate('/login');
     }
   }, [deleteStatus, navigate]);
 

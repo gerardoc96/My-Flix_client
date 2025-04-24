@@ -36,7 +36,7 @@ const moviesSlice = createSlice({
     list: [],
     currentMovie: null,
     statusAll: 'idle',
-    StatusOne: 'idle',
+    statusOne: 'idle',
     errorAll: null,
     errorOne: null
   },
@@ -60,16 +60,16 @@ const moviesSlice = createSlice({
 
       // handles the three states of the getMovie thunk
       .addCase(getMovie.pending, (state) => {
-        state.StatusOne = 'loading';
+        state.statusOne = 'loading';
         state.errorOne = null;
         state.currentMovie = null;
       })
       .addCase(getMovie.fulfilled, (state, { payload }) => {
-        state.StatusOne = 'succeeded';
+        state.statusOne = 'succeeded';
         state.currentMovie = payload;
       })
       .addCase(getMovie.rejected, (state, { payload }) => {
-        state.StatusOne = 'failed';
+        state.statusOne = 'failed';
         state.errorOne = payload.message || 'Could not fetch the movie';
       });
   }

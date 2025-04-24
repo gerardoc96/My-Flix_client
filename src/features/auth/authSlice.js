@@ -98,8 +98,8 @@ const userFromStorage = localStorage.getItem('user');
 const initialState = {
   user: userFromStorage ? JSON.parse(userFromStorage) : null,
   token: tokenFromStorage || null,
-  LoginStatus: 'idle',
-  LoginError: null,
+  status: 'idle',
+  error: null,
   signupStatus: 'idle',
   signupError: null,
   updateStatus: 'idle',
@@ -130,7 +130,7 @@ const authSlice = createSlice({
       // Login async thunk
       .addCase(login.pending, (state) => {
         state.status = 'loading';
-        state.LoginError = null;
+        state.error = null;
       })
       .addCase(login.fulfilled, (state, { payload }) => {
         state.status = 'succeeded';
@@ -141,7 +141,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, { payload }) => {
         state.status = 'failed';
-        state.LoginError = payload.message || 'Login failed';
+        state.error = payload.message || 'Login failed';
       })
 
       // Signup async thunk
