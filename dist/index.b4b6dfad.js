@@ -22404,6 +22404,8 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
 parcelHelpers.export(exports, "signup", ()=>signup);
+parcelHelpers.export(exports, "updateUser", ()=>updateUser);
+parcelHelpers.export(exports, "deleteUser", ()=>deleteUser);
 parcelHelpers.export(exports, "logout", ()=>logout);
 var _toolkit = require("@reduxjs/toolkit");
 var _axios = require("../../api/axios");
@@ -22432,16 +22434,43 @@ const signup = (0, _toolkit.createAsyncThunk)("auth/signup", async ({ Username, 
         return rejectWithValue(error.response?.data || error.message);
     }
 });
+const updateUser = (0, _toolkit.createAsyncThunk)("auth/updateUser", async ({ Username, Password, Email, Birthday }, { getState, rejectWithValue })=>{
+    const { auth: { user } } = getState();
+    try {
+        const { data } = await (0, _axiosDefault.default).put(`/users/${user.Username}`, {
+            Username,
+            Password,
+            Email,
+            Birthday
+        });
+        return data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
+const deleteUser = (0, _toolkit.createAsyncThunk)("auth/deleteUser", async (_, { getState, rejectWithValue })=>{
+    const { auth: { user } } = getState();
+    try {
+        await (0, _axiosDefault.default).delete(`/users/${user.Username}`);
+        return;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
 // Initialize state from localStorage if available
 const tokenFromStorage = localStorage.getItem("token");
 const userFromStorage = localStorage.getItem("user");
 const initialState = {
     user: userFromStorage ? JSON.parse(userFromStorage) : null,
     token: tokenFromStorage || null,
-    status: "idle",
-    error: null,
+    LoginStatus: "idle",
+    LoginError: null,
     signupStatus: "idle",
-    signupError: null
+    signupError: null,
+    updateStatus: "idle",
+    updateError: null,
+    deleteStatus: "idle",
+    deleteError: null
 };
 // initial state
 const authSlice = (0, _toolkit.createSlice)({
@@ -22457,10 +22486,10 @@ const authSlice = (0, _toolkit.createSlice)({
         }
     },
     extraReducers: (builder)=>{
-        builder// handles the three states of the login async thunk
+        builder// Login async thunk
         .addCase(login.pending, (state)=>{
             state.status = "loading";
-            state.error = null;
+            state.LoginError = null;
         }).addCase(login.fulfilled, (state, { payload })=>{
             state.status = "succeeded";
             state.user = payload.user;
@@ -22469,8 +22498,8 @@ const authSlice = (0, _toolkit.createSlice)({
             localStorage.setItem("user", JSON.stringify(payload.user));
         }).addCase(login.rejected, (state, { payload })=>{
             state.status = "failed";
-            state.error = payload.massage || "Login failed";
-        })// handles the three states of the signup async thunk
+            state.LoginError = payload.message || "Login failed";
+        })// Signup async thunk
         .addCase(signup.pending, (state)=>{
             state.signupStatus = "loading";
             state.signupError = null;
@@ -22479,6 +22508,29 @@ const authSlice = (0, _toolkit.createSlice)({
         }).addCase(signup.rejected, (state, { payload })=>{
             state.signupStatus = "failed";
             state.signupError = payload.errors ? payload.errors.map((e)=>e.msg).join(", ") : payload.message || "Signup failed";
+        })// UpdateUser async thunk
+        .addCase(updateUser.pending, (state)=>{
+            state.updateStatus = "loading";
+            state.updateError = null;
+        }).addCase(updateUser.fulfilled, (state, { payload })=>{
+            state.updateStatus = "succeeded";
+            state.user = payload;
+        }).addCase(updateUser.rejected, (state, { payload })=>{
+            state.updateStatus = "failed";
+            state.updateError = payload.message || "Failed to update profile";
+        })//DeleteUser async thunk
+        .addCase(deleteUser.pending, (state)=>{
+            state.deleteStatus = "loading";
+            state.deleteError = null;
+        }).addCase(deleteUser.fulfilled, (state)=>{
+            state.deleteStatus = "succeeded";
+            state.user = null;
+            state.token = null;
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+        }).addCase(deleteUser.rejected, (state, { payload })=>{
+            state.deleteStatus = "failed";
+            state.deleteError = payload.message || "Failed to delete profile";
         });
     }
 });
@@ -27307,7 +27359,7 @@ const moviesSlice = (0, _toolkit.createSlice)({
             state.list = payload;
         }).addCase(getMovies.rejected, (state, { payload })=>{
             state.statusAll = "failed";
-            state.errorAll = payload.massage || "Could not fetch movies";
+            state.errorAll = payload.message || "Could not fetch movies";
         })// handles the three states of the getMovie thunk
         .addCase(getMovie.pending, (state)=>{
             state.StatusOne = "loading";
@@ -27318,7 +27370,7 @@ const moviesSlice = (0, _toolkit.createSlice)({
             state.currentMovie = payload;
         }).addCase(getMovie.rejected, (state, { payload })=>{
             state.StatusOne = "failed";
-            state.errorOne = payload.massage || "Could not fetch the movie";
+            state.errorOne = payload.message || "Could not fetch the movie";
         });
     }
 });
@@ -38664,7 +38716,7 @@ var _toggleButtonGroupDefault = parcelHelpers.interopDefault(_toggleButtonGroup)
 var _tooltip = require("./Tooltip");
 var _tooltipDefault = parcelHelpers.interopDefault(_tooltip);
 
-},{"./Accordion":false,"./AccordionContext":false,"./AccordionCollapse":false,"./AccordionButton":false,"./AccordionBody":false,"./AccordionHeader":false,"./AccordionItem":false,"./Alert":"e3Xec","./AlertHeading":false,"./AlertLink":false,"./Anchor":false,"./Badge":false,"./Breadcrumb":false,"./BreadcrumbItem":false,"./Button":"aPzUt","./ButtonGroup":false,"./ButtonToolbar":false,"./Card":"lAynp","./CardBody":false,"./CardFooter":false,"./CardGroup":false,"./CardHeader":false,"./CardImg":false,"./CardImgOverlay":false,"./CardLink":false,"./CardSubtitle":false,"./CardText":false,"./CardTitle":false,"./Carousel":false,"./CarouselCaption":false,"./CarouselItem":false,"./CloseButton":false,"./Col":"2L2I6","./Collapse":"acuzI","./Container":"hEdsw","./Dropdown":false,"./DropdownButton":false,"./DropdownDivider":false,"./DropdownHeader":false,"./DropdownItem":false,"./DropdownItemText":false,"./DropdownMenu":false,"./DropdownToggle":false,"./Fade":false,"./Figure":false,"./FigureCaption":false,"./FigureImage":false,"./Form":"iBZ80","./FormControl":false,"./FormCheck":false,"./FormFloating":false,"./FloatingLabel":false,"./FormGroup":false,"./FormLabel":false,"./FormText":false,"./FormSelect":false,"./Image":false,"./InputGroup":false,"./ListGroup":false,"./ListGroupItem":false,"./Modal":false,"./ModalBody":false,"./ModalDialog":false,"./ModalFooter":false,"./ModalHeader":false,"./ModalTitle":false,"./Nav":"cXyL2","./Navbar":"1mHjo","./NavbarBrand":false,"./NavbarCollapse":false,"./NavbarOffcanvas":false,"./NavbarText":false,"./NavbarToggle":false,"./NavDropdown":false,"./NavItem":false,"./NavLink":false,"./Offcanvas":false,"./OffcanvasBody":false,"./OffcanvasHeader":false,"./OffcanvasTitle":false,"./OffcanvasToggling":false,"./Overlay":false,"./OverlayTrigger":false,"./PageItem":false,"./Pagination":false,"./Placeholder":false,"./PlaceholderButton":false,"./Popover":false,"./PopoverBody":false,"./PopoverHeader":false,"./ProgressBar":false,"./Ratio":false,"./Row":"cMC39","./Spinner":"2r8jr","./SplitButton":false,"./SSRProvider":false,"./Stack":false,"./Tab":false,"./TabContainer":false,"./TabContent":false,"./Table":false,"./TabPane":false,"./Tabs":false,"./ThemeProvider":false,"./Toast":false,"./ToastBody":false,"./ToastContainer":false,"./ToastHeader":false,"./ToggleButton":false,"./ToggleButtonGroup":false,"./Tooltip":false,"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"e3Xec":[function(require,module,exports) {
+},{"./Accordion":false,"./AccordionContext":false,"./AccordionCollapse":false,"./AccordionButton":false,"./AccordionBody":false,"./AccordionHeader":false,"./AccordionItem":false,"./Alert":"e3Xec","./AlertHeading":false,"./AlertLink":false,"./Anchor":false,"./Badge":false,"./Breadcrumb":false,"./BreadcrumbItem":false,"./Button":"aPzUt","./ButtonGroup":false,"./ButtonToolbar":false,"./Card":"lAynp","./CardBody":false,"./CardFooter":false,"./CardGroup":false,"./CardHeader":false,"./CardImg":false,"./CardImgOverlay":false,"./CardLink":false,"./CardSubtitle":false,"./CardText":false,"./CardTitle":false,"./Carousel":false,"./CarouselCaption":false,"./CarouselItem":false,"./CloseButton":false,"./Col":"2L2I6","./Collapse":"acuzI","./Container":"hEdsw","./Dropdown":false,"./DropdownButton":false,"./DropdownDivider":false,"./DropdownHeader":false,"./DropdownItem":false,"./DropdownItemText":false,"./DropdownMenu":false,"./DropdownToggle":false,"./Fade":false,"./Figure":false,"./FigureCaption":false,"./FigureImage":false,"./Form":"iBZ80","./FormControl":false,"./FormCheck":false,"./FormFloating":false,"./FloatingLabel":false,"./FormGroup":false,"./FormLabel":false,"./FormText":false,"./FormSelect":false,"./Image":false,"./InputGroup":false,"./ListGroup":"4tGXh","./ListGroupItem":false,"./Modal":false,"./ModalBody":false,"./ModalDialog":false,"./ModalFooter":false,"./ModalHeader":false,"./ModalTitle":false,"./Nav":"cXyL2","./Navbar":"1mHjo","./NavbarBrand":false,"./NavbarCollapse":false,"./NavbarOffcanvas":false,"./NavbarText":false,"./NavbarToggle":false,"./NavDropdown":false,"./NavItem":false,"./NavLink":false,"./Offcanvas":false,"./OffcanvasBody":false,"./OffcanvasHeader":false,"./OffcanvasTitle":false,"./OffcanvasToggling":false,"./Overlay":false,"./OverlayTrigger":false,"./PageItem":false,"./Pagination":false,"./Placeholder":false,"./PlaceholderButton":false,"./Popover":false,"./PopoverBody":false,"./PopoverHeader":false,"./ProgressBar":false,"./Ratio":false,"./Row":"cMC39","./Spinner":"2r8jr","./SplitButton":false,"./SSRProvider":false,"./Stack":false,"./Tab":false,"./TabContainer":false,"./TabContent":false,"./Table":false,"./TabPane":false,"./Tabs":false,"./ThemeProvider":false,"./Toast":false,"./ToastBody":false,"./ToastContainer":false,"./ToastHeader":false,"./ToggleButton":false,"./ToggleButtonGroup":false,"./Tooltip":false,"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"e3Xec":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _classnames = require("classnames");
@@ -42996,63 +43048,44 @@ const FloatingLabel = /*#__PURE__*/ _react.forwardRef(({ bsPrefix, className, ch
 FloatingLabel.displayName = "FloatingLabel";
 exports.default = FloatingLabel;
 
-},{"classnames":"jocGM","react":"21dqq","./FormGroup":"1qBHH","./ThemeProvider":"dVixI","react/jsx-runtime":"6AEwr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"cXyL2":[function(require,module,exports) {
+},{"classnames":"jocGM","react":"21dqq","./FormGroup":"1qBHH","./ThemeProvider":"dVixI","react/jsx-runtime":"6AEwr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"4tGXh":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _classnames = require("classnames");
 var _classnamesDefault = parcelHelpers.interopDefault(_classnames);
 var _react = require("react");
+var _warning = require("warning");
+var _warningDefault = parcelHelpers.interopDefault(_warning);
 var _uncontrollable = require("uncontrollable");
 var _nav = require("@restart/ui/Nav");
 var _navDefault = parcelHelpers.interopDefault(_nav);
 var _themeProvider = require("./ThemeProvider");
-var _navbarContext = require("./NavbarContext");
-var _navbarContextDefault = parcelHelpers.interopDefault(_navbarContext);
-var _cardHeaderContext = require("./CardHeaderContext");
-var _cardHeaderContextDefault = parcelHelpers.interopDefault(_cardHeaderContext);
-var _navItem = require("./NavItem");
-var _navItemDefault = parcelHelpers.interopDefault(_navItem);
-var _navLink = require("./NavLink");
-var _navLinkDefault = parcelHelpers.interopDefault(_navLink);
+var _listGroupItem = require("./ListGroupItem");
+var _listGroupItemDefault = parcelHelpers.interopDefault(_listGroupItem);
 var _jsxRuntime = require("react/jsx-runtime");
 "use client";
-const Nav = /*#__PURE__*/ _react.forwardRef((uncontrolledProps, ref)=>{
-    const { as = "div", bsPrefix: initialBsPrefix, variant, fill = false, justify = false, navbar, navbarScroll, className, activeKey, ...props } = (0, _uncontrollable.useUncontrolled)(uncontrolledProps, {
+const ListGroup = /*#__PURE__*/ _react.forwardRef((props, ref)=>{
+    const { className, bsPrefix: initialBsPrefix, variant, horizontal, numbered, // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+    as = "div", ...controlledProps } = (0, _uncontrollable.useUncontrolled)(props, {
         activeKey: "onSelect"
     });
-    const bsPrefix = (0, _themeProvider.useBootstrapPrefix)(initialBsPrefix, "nav");
-    let navbarBsPrefix;
-    let cardHeaderBsPrefix;
-    let isNavbar = false;
-    const navbarContext = (0, _react.useContext)((0, _navbarContextDefault.default));
-    const cardHeaderContext = (0, _react.useContext)((0, _cardHeaderContextDefault.default));
-    if (navbarContext) {
-        navbarBsPrefix = navbarContext.bsPrefix;
-        isNavbar = navbar == null ? true : navbar;
-    } else if (cardHeaderContext) ({ cardHeaderBsPrefix } = cardHeaderContext);
+    const bsPrefix = (0, _themeProvider.useBootstrapPrefix)(initialBsPrefix, "list-group");
+    let horizontalVariant;
+    if (horizontal) horizontalVariant = horizontal === true ? "horizontal" : `horizontal-${horizontal}`;
+    (0, _warningDefault.default)(!(horizontal && variant === "flush"), '`variant="flush"` and `horizontal` should not be used together.');
     return /*#__PURE__*/ (0, _jsxRuntime.jsx)((0, _navDefault.default), {
-        as: as,
         ref: ref,
-        activeKey: activeKey,
-        className: (0, _classnamesDefault.default)(className, {
-            [bsPrefix]: !isNavbar,
-            [`${navbarBsPrefix}-nav`]: isNavbar,
-            [`${navbarBsPrefix}-nav-scroll`]: isNavbar && navbarScroll,
-            [`${cardHeaderBsPrefix}-${variant}`]: !!cardHeaderBsPrefix,
-            [`${bsPrefix}-${variant}`]: !!variant,
-            [`${bsPrefix}-fill`]: fill,
-            [`${bsPrefix}-justified`]: justify
-        }),
-        ...props
+        ...controlledProps,
+        as: as,
+        className: (0, _classnamesDefault.default)(className, bsPrefix, variant && `${bsPrefix}-${variant}`, horizontalVariant && `${bsPrefix}-${horizontalVariant}`, numbered && `${bsPrefix}-numbered`)
     });
 });
-Nav.displayName = "Nav";
-exports.default = Object.assign(Nav, {
-    Item: (0, _navItemDefault.default),
-    Link: (0, _navLinkDefault.default)
+ListGroup.displayName = "ListGroup";
+exports.default = Object.assign(ListGroup, {
+    Item: (0, _listGroupItemDefault.default)
 });
 
-},{"classnames":"jocGM","react":"21dqq","uncontrollable":"b3yWY","@restart/ui/Nav":"fZdNd","./ThemeProvider":"dVixI","./NavbarContext":"dpn1g","./CardHeaderContext":"36cNB","./NavItem":"ew05W","./NavLink":"7geL8","react/jsx-runtime":"6AEwr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fZdNd":[function(require,module,exports) {
+},{"classnames":"jocGM","react":"21dqq","warning":"eUVzU","uncontrollable":"b3yWY","@restart/ui/Nav":"fZdNd","./ThemeProvider":"dVixI","./ListGroupItem":"9U5b8","react/jsx-runtime":"6AEwr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fZdNd":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _querySelectorAll = require("dom-helpers/querySelectorAll");
@@ -43376,7 +43409,111 @@ const NavItem = /*#__PURE__*/ _react.forwardRef((_ref, ref)=>{
 NavItem.displayName = "NavItem";
 exports.default = NavItem;
 
-},{"react":"21dqq","@restart/hooks/useEventCallback":"62akH","./NavContext":"j1SMA","./SelectableContext":"8zLqy","./Button":"8YUbR","./DataKey":"9vwZh","./TabContext":"cI3G3","react/jsx-runtime":"6AEwr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dpn1g":[function(require,module,exports) {
+},{"react":"21dqq","@restart/hooks/useEventCallback":"62akH","./NavContext":"j1SMA","./SelectableContext":"8zLqy","./Button":"8YUbR","./DataKey":"9vwZh","./TabContext":"cI3G3","react/jsx-runtime":"6AEwr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9U5b8":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _classnames = require("classnames");
+var _classnamesDefault = parcelHelpers.interopDefault(_classnames);
+var _react = require("react");
+var _warning = require("warning");
+var _warningDefault = parcelHelpers.interopDefault(_warning);
+var _useEventCallback = require("@restart/hooks/useEventCallback");
+var _useEventCallbackDefault = parcelHelpers.interopDefault(_useEventCallback);
+var _navItem = require("@restart/ui/NavItem");
+var _selectableContext = require("@restart/ui/SelectableContext");
+var _themeProvider = require("./ThemeProvider");
+var _jsxRuntime = require("react/jsx-runtime");
+"use client";
+const ListGroupItem = /*#__PURE__*/ _react.forwardRef(({ bsPrefix, active, disabled, eventKey, className, variant, action, as, ...props }, ref)=>{
+    bsPrefix = (0, _themeProvider.useBootstrapPrefix)(bsPrefix, "list-group-item");
+    const [navItemProps, meta] = (0, _navItem.useNavItem)({
+        key: (0, _selectableContext.makeEventKey)(eventKey, props.href),
+        active,
+        ...props
+    });
+    const handleClick = (0, _useEventCallbackDefault.default)((event)=>{
+        if (disabled) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        navItemProps.onClick(event);
+    });
+    if (disabled && props.tabIndex === undefined) {
+        props.tabIndex = -1;
+        props["aria-disabled"] = true;
+    }
+    // eslint-disable-next-line no-nested-ternary
+    const Component = as || (action ? props.href ? "a" : "button" : "div");
+    (0, _warningDefault.default)(as || !(!action && props.href), "`action=false` and `href` should not be used together.");
+    return /*#__PURE__*/ (0, _jsxRuntime.jsx)(Component, {
+        ref: ref,
+        ...props,
+        ...navItemProps,
+        onClick: handleClick,
+        className: (0, _classnamesDefault.default)(className, bsPrefix, meta.isActive && "active", disabled && "disabled", variant && `${bsPrefix}-${variant}`, action && `${bsPrefix}-action`)
+    });
+});
+ListGroupItem.displayName = "ListGroupItem";
+exports.default = ListGroupItem;
+
+},{"classnames":"jocGM","react":"21dqq","warning":"eUVzU","@restart/hooks/useEventCallback":"7ONdq","@restart/ui/NavItem":"2cGYS","@restart/ui/SelectableContext":"8zLqy","./ThemeProvider":"dVixI","react/jsx-runtime":"6AEwr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"cXyL2":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _classnames = require("classnames");
+var _classnamesDefault = parcelHelpers.interopDefault(_classnames);
+var _react = require("react");
+var _uncontrollable = require("uncontrollable");
+var _nav = require("@restart/ui/Nav");
+var _navDefault = parcelHelpers.interopDefault(_nav);
+var _themeProvider = require("./ThemeProvider");
+var _navbarContext = require("./NavbarContext");
+var _navbarContextDefault = parcelHelpers.interopDefault(_navbarContext);
+var _cardHeaderContext = require("./CardHeaderContext");
+var _cardHeaderContextDefault = parcelHelpers.interopDefault(_cardHeaderContext);
+var _navItem = require("./NavItem");
+var _navItemDefault = parcelHelpers.interopDefault(_navItem);
+var _navLink = require("./NavLink");
+var _navLinkDefault = parcelHelpers.interopDefault(_navLink);
+var _jsxRuntime = require("react/jsx-runtime");
+"use client";
+const Nav = /*#__PURE__*/ _react.forwardRef((uncontrolledProps, ref)=>{
+    const { as = "div", bsPrefix: initialBsPrefix, variant, fill = false, justify = false, navbar, navbarScroll, className, activeKey, ...props } = (0, _uncontrollable.useUncontrolled)(uncontrolledProps, {
+        activeKey: "onSelect"
+    });
+    const bsPrefix = (0, _themeProvider.useBootstrapPrefix)(initialBsPrefix, "nav");
+    let navbarBsPrefix;
+    let cardHeaderBsPrefix;
+    let isNavbar = false;
+    const navbarContext = (0, _react.useContext)((0, _navbarContextDefault.default));
+    const cardHeaderContext = (0, _react.useContext)((0, _cardHeaderContextDefault.default));
+    if (navbarContext) {
+        navbarBsPrefix = navbarContext.bsPrefix;
+        isNavbar = navbar == null ? true : navbar;
+    } else if (cardHeaderContext) ({ cardHeaderBsPrefix } = cardHeaderContext);
+    return /*#__PURE__*/ (0, _jsxRuntime.jsx)((0, _navDefault.default), {
+        as: as,
+        ref: ref,
+        activeKey: activeKey,
+        className: (0, _classnamesDefault.default)(className, {
+            [bsPrefix]: !isNavbar,
+            [`${navbarBsPrefix}-nav`]: isNavbar,
+            [`${navbarBsPrefix}-nav-scroll`]: isNavbar && navbarScroll,
+            [`${cardHeaderBsPrefix}-${variant}`]: !!cardHeaderBsPrefix,
+            [`${bsPrefix}-${variant}`]: !!variant,
+            [`${bsPrefix}-fill`]: fill,
+            [`${bsPrefix}-justified`]: justify
+        }),
+        ...props
+    });
+});
+Nav.displayName = "Nav";
+exports.default = Object.assign(Nav, {
+    Item: (0, _navItemDefault.default),
+    Link: (0, _navLinkDefault.default)
+});
+
+},{"classnames":"jocGM","react":"21dqq","uncontrollable":"b3yWY","@restart/ui/Nav":"fZdNd","./ThemeProvider":"dVixI","./NavbarContext":"dpn1g","./CardHeaderContext":"36cNB","./NavItem":"ew05W","./NavLink":"7geL8","react/jsx-runtime":"6AEwr","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dpn1g":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _react = require("react");
@@ -45115,16 +45252,14 @@ var _reactRedux = require("react-redux");
 var _reactRouter = require("react-router");
 var _authSlice = require("../features/auth/authSlice");
 var _reactBootstrap = require("react-bootstrap");
+var _userForm = require("../components/userform/UserForm");
+var _userFormDefault = parcelHelpers.interopDefault(_userForm);
 var _s = $RefreshSig$();
 function SignupPage() {
     _s();
     const dispatch = (0, _reactRedux.useDispatch)();
     const navigate = (0, _reactRouter.useNavigate)();
     const { signupStatus, signupError } = (0, _reactRedux.useSelector)((state)=>state.auth);
-    const [Username, setUsername] = (0, _react.useState)("");
-    const [Password, setPassword] = (0, _react.useState)("");
-    const [Email, setEmail] = (0, _react.useState)("");
-    const [Birthday, setBirthday] = (0, _react.useState)("");
     // Redirect to login page after successful signup
     (0, _react.useEffect)(()=>{
         if (signupStatus === "succeeded") navigate("/login", {
@@ -45134,14 +45269,16 @@ function SignupPage() {
         signupStatus,
         navigate
     ]);
-    const handleSubmit = (e)=>{
-        e.preventDefault();
-        dispatch((0, _authSlice.signup)({
-            Username,
-            Password,
-            Email,
-            Birthday
-        }));
+    // Sets initial values as empty
+    const initialValues = {
+        Username: "",
+        Password: "",
+        Email: "",
+        Birthday: ""
+    };
+    // Handles form submission
+    const handleSubmit = (formData)=>{
+        dispatch((0, _authSlice.signup)(formData));
     };
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
         children: [
@@ -45149,7 +45286,7 @@ function SignupPage() {
                 children: "Sign Up"
             }, void 0, false, {
                 fileName: "src/pages/SignupPage.jsx",
-                lineNumber: 31,
+                lineNumber: 35,
                 columnNumber: 7
             }, this),
             signupStatus === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
@@ -45157,139 +45294,18 @@ function SignupPage() {
                 children: signupError
             }, void 0, false, {
                 fileName: "src/pages/SignupPage.jsx",
-                lineNumber: 34,
+                lineNumber: 38,
                 columnNumber: 9
             }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form), {
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _userFormDefault.default), {
+                initialValues: initialValues,
+                status: signupStatus,
+                error: signupError,
                 onSubmit: handleSubmit,
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                        controlId: "username",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                                children: "Username"
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 40,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                                type: "text",
-                                value: Username,
-                                minLength: 5,
-                                onChange: (e)=>setUsername(e.target.value),
-                                placeholder: "At least 5 alphabetic characters",
-                                required: true
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 41,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 39,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                        controlId: "password",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                                children: "Password"
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 52,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                                type: "password",
-                                value: Password,
-                                onChange: (e)=>setPassword(e.target.value),
-                                required: true
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 53,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 51,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                        controlId: "email",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                                children: "Email"
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 62,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                                type: "email",
-                                value: Email,
-                                onChange: (e)=>setEmail(e.target.value),
-                                required: true
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 63,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 61,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
-                        controlId: "birthday",
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
-                                children: "Birthday"
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 72,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
-                                type: "date",
-                                value: Birthday,
-                                onChange: (e)=>setBirthday(e.target.value),
-                                required: true
-                            }, void 0, false, {
-                                fileName: "src/pages/SignupPage.jsx",
-                                lineNumber: 73,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 71,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
-                        type: "submit",
-                        disabled: signupStatus === "loading",
-                        children: signupStatus === "Loading" ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
-                            as: "span",
-                            animation: "border",
-                            size: "sm"
-                        }, void 0, false, {
-                            fileName: "src/pages/SignupPage.jsx",
-                            lineNumber: 85,
-                            columnNumber: 15
-                        }, this) : "Sign Up"
-                    }, void 0, false, {
-                        fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 81,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
+                submitLabel: "Sign Up"
+            }, void 0, false, {
                 fileName: "src/pages/SignupPage.jsx",
-                lineNumber: 37,
+                lineNumber: 42,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
@@ -45300,23 +45316,23 @@ function SignupPage() {
                         children: "Log In"
                     }, void 0, false, {
                         fileName: "src/pages/SignupPage.jsx",
-                        lineNumber: 91,
+                        lineNumber: 51,
                         columnNumber: 34
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/pages/SignupPage.jsx",
-                lineNumber: 90,
+                lineNumber: 50,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/pages/SignupPage.jsx",
-        lineNumber: 30,
+        lineNumber: 34,
         columnNumber: 5
     }, this);
 }
-_s(SignupPage, "SXp/7ENYsw3aYAAemyCVlPLY/bE=", false, function() {
+_s(SignupPage, "jJn7xtdMV5Gj1Xd0QKNaRyaWy74=", false, function() {
     return [
         (0, _reactRedux.useDispatch),
         (0, _reactRouter.useNavigate),
@@ -45332,7 +45348,210 @@ $RefreshReg$(_c, "SignupPage");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","../features/auth/authSlice":"kbh7b","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"1rZCQ":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","react-router":"dXVwI","../features/auth/authSlice":"kbh7b","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","../components/userform/UserForm":"5ZspT"}],"5ZspT":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$ae57 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$ae57.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>UserForm);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _propTypes = require("prop-types");
+var _propTypesDefault = parcelHelpers.interopDefault(_propTypes);
+var _reactBootstrap = require("react-bootstrap");
+var _s = $RefreshSig$();
+function UserForm({ initialValues, status, error, onSubmit, submitLabel }) {
+    _s();
+    const [formData, setFormData] = (0, _react.useState)(initialValues);
+    //Reset local form when initialValues change
+    (0, _react.useEffect)(()=>{
+        setFormData(initialValues);
+    }, [
+        initialValues
+    ]);
+    const handleChange = (e)=>{
+        const { name, value } = e.target;
+        setFormData((Data)=>({
+                ...Data,
+                [name]: value
+            }));
+    };
+    const handleSubmit = (e)=>{
+        e.preventDefault();
+        onSubmit(formData);
+    };
+    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form), {
+        onSubmit: handleSubmit,
+        children: [
+            status === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+                variant: "danger",
+                children: error
+            }, void 0, false, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 31,
+                columnNumber: 31
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "username",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Username"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 34,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Username",
+                        type: "text",
+                        value: formData.Username,
+                        onChange: handleChange,
+                        minLength: 5,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 35,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 33,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "password",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Password"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 46,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Password",
+                        type: "password",
+                        value: formData.Password,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 47,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 45,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "email",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Email"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 57,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Email",
+                        type: "email",
+                        value: formData.Email,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 58,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 56,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Group, {
+                controlId: "birthday",
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Label, {
+                        children: "Birthday"
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 68,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Form).Control, {
+                        name: "Birthday",
+                        type: "date",
+                        value: formData.Birthday,
+                        onChange: handleChange,
+                        required: true
+                    }, void 0, false, {
+                        fileName: "src/components/userform/UserForm.jsx",
+                        lineNumber: 69,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 67,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                type: "submit",
+                disabled: status === "loading",
+                children: status === "loading" ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Spinner), {
+                    as: "span",
+                    animation: "border",
+                    size: "sm"
+                }, void 0, false, {
+                    fileName: "src/components/userform/UserForm.jsx",
+                    lineNumber: 80,
+                    columnNumber: 13
+                }, this) : submitLabel
+            }, void 0, false, {
+                fileName: "src/components/userform/UserForm.jsx",
+                lineNumber: 78,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "src/components/userform/UserForm.jsx",
+        lineNumber: 30,
+        columnNumber: 5
+    }, this);
+}
+_s(UserForm, "ZiBkvzYxlLOw7MKsQ58XtUjqjlY=");
+_c = UserForm;
+UserForm.propTypes = {
+    initialValues: (0, _propTypesDefault.default).shape({
+        Username: (0, _propTypesDefault.default).string,
+        Password: (0, _propTypesDefault.default).string,
+        Email: (0, _propTypesDefault.default).string,
+        Birthday: (0, _propTypesDefault.default).string
+    }).isRequired,
+    status: (0, _propTypesDefault.default).string.isRequired,
+    error: (0, _propTypesDefault.default).string,
+    onSubmit: (0, _propTypesDefault.default).func.isRequired,
+    submitLabel: (0, _propTypesDefault.default).string.isRequired
+};
+var _c;
+$RefreshReg$(_c, "UserForm");
+
+  $parcel$ReactRefreshHelpers$ae57.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","prop-types":"7wKI2","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"1rZCQ":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$41d1 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -45466,8 +45685,227 @@ $RefreshReg$(_c, "MovieListPage");
   window.$RefreshSig$ = prevRefreshSig;
 }
 },{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-redux":"62sf7","../features/movies/moviesSlice":"lBL6e","react-bootstrap":"3AD9A","react-router":"dXVwI","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"9pIbl":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$ed79 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$ed79.prelude(module);
 
-},{}],"b2vIG":[function(require,module,exports) {
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>ProfilePage);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _reactRedux = require("react-redux");
+var _reactRouter = require("react-router");
+var _reactBootstrap = require("react-bootstrap");
+var _authSlice = require("../features/auth/authSlice");
+var _userForm = require("../components/userform/UserForm");
+var _userFormDefault = parcelHelpers.interopDefault(_userForm);
+var _s = $RefreshSig$();
+function ProfilePage() {
+    _s();
+    const dispatch = (0, _reactRedux.useDispatch)();
+    const navigate = (0, _reactRouter.useNavigate)();
+    const { user, updateStatus, updateError, deleteStatus, deleteError } = (0, _reactRedux.useSelector)((state)=>state.auth);
+    // Toggle view vs edit
+    const [isEditing, setIsEditing] = (0, _react.useState)(false);
+    const handleUpdate = (formData)=>{
+        dispatch((0, _authSlice.updateUser)(formData)).then((action)=>{
+            if (action.type === "auth/updateUser/fulfilled") setIsEditing(false);
+        });
+    };
+    const handleDelete = ()=>{
+        if (window.confirm("Are you sure you want to delete your profiel? This action cannot be undone.")) dispatch((0, _authSlice.deleteUser)());
+    };
+    const forminitialValues = {
+        Username: user.Username,
+        Password: "",
+        Email: user.Email,
+        Birthday: user.Birthday.slice(0, 10)
+    };
+    const isBusy = updateStatus === "loading";
+    // Redirects to login page when deltion succeeds
+    (0, _react.useEffect)(()=>{
+        if (deleteStatus === "succeeded") navigate("/longin");
+    }, [
+        deleteStatus,
+        navigate
+    ]);
+    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
+        children: [
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
+                        children: "Profile"
+                    }, void 0, false, {
+                        fileName: "src/pages/ProfilePage.jsx",
+                        lineNumber: 49,
+                        columnNumber: 9
+                    }, this),
+                    isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                        onClick: ()=>setIsEditing(false),
+                        disabled: isBusy,
+                        children: "Cancel"
+                    }, void 0, false, {
+                        fileName: "src/pages/ProfilePage.jsx",
+                        lineNumber: 51,
+                        columnNumber: 11
+                    }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                        children: [
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                onClick: ()=>setIsEditing(true),
+                                children: "Edit Profile"
+                            }, void 0, false, {
+                                fileName: "src/pages/ProfilePage.jsx",
+                                lineNumber: 57,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
+                                variant: "danger",
+                                onClick: handleDelete,
+                                disabled: deleteStatus === "loading",
+                                children: deleteStatus === "loading" ? "Deleting..." : "Delete Profile"
+                            }, void 0, false, {
+                                fileName: "src/pages/ProfilePage.jsx",
+                                lineNumber: 60,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "src/pages/ProfilePage.jsx",
+                        lineNumber: 56,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 48,
+                columnNumber: 7
+            }, this),
+            isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _userFormDefault.default), {
+                initialValues: forminitialValues,
+                status: updateStatus,
+                error: updateError,
+                onSubmit: handleUpdate,
+                submitLabel: isBusy ? "Saving..." : "Save Changes"
+            }, void 0, false, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 69,
+                columnNumber: 9
+            }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
+                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup), {
+                    variant: "flush",
+                    children: [
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
+                            children: [
+                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                    children: "Username:"
+                                }, void 0, false, {
+                                    fileName: "src/pages/ProfilePage.jsx",
+                                    lineNumber: 81,
+                                    columnNumber: 15
+                                }, this),
+                                " ",
+                                user.Username
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/ProfilePage.jsx",
+                            lineNumber: 80,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
+                            children: [
+                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                    children: "Email:"
+                                }, void 0, false, {
+                                    fileName: "src/pages/ProfilePage.jsx",
+                                    lineNumber: 85,
+                                    columnNumber: 15
+                                }, this),
+                                " ",
+                                user.Email
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/ProfilePage.jsx",
+                            lineNumber: 84,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
+                            children: [
+                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                                    children: "Birthday:"
+                                }, void 0, false, {
+                                    fileName: "src/pages/ProfilePage.jsx",
+                                    lineNumber: 89,
+                                    columnNumber: 15
+                                }, this),
+                                " ",
+                                new Date(user.Birthday).toLocaleDateString()
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/ProfilePage.jsx",
+                            lineNumber: 88,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "src/pages/ProfilePage.jsx",
+                    lineNumber: 78,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 77,
+                columnNumber: 9
+            }, this),
+            updateStatus === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+                variant: "danger",
+                children: [
+                    "Update failed: ",
+                    updateError
+                ]
+            }, void 0, true, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 98,
+                columnNumber: 9
+            }, this),
+            deleteStatus === "failed" && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
+                variant: "danger",
+                children: [
+                    "Delete failed: ",
+                    deleteError
+                ]
+            }, void 0, true, {
+                fileName: "src/pages/ProfilePage.jsx",
+                lineNumber: 102,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "src/pages/ProfilePage.jsx",
+        lineNumber: 47,
+        columnNumber: 5
+    }, this);
+}
+_s(ProfilePage, "8idlWHnDlmjeJ8oMQWpWCbYplQM=", false, function() {
+    return [
+        (0, _reactRedux.useDispatch),
+        (0, _reactRouter.useNavigate),
+        (0, _reactRedux.useSelector)
+    ];
+});
+_c = ProfilePage;
+var _c;
+$RefreshReg$(_c, "ProfilePage");
+
+  $parcel$ReactRefreshHelpers$ed79.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react":"21dqq","react-redux":"62sf7","react-bootstrap":"3AD9A","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/jsx-dev-runtime":"iTorj","../features/auth/authSlice":"kbh7b","../components/userform/UserForm":"5ZspT","react-router":"dXVwI"}],"b2vIG":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$e910 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;

@@ -1,12 +1,11 @@
-import React, { use, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { getMovie } from "../features/movies/moviesSlice";
 import { Container, Row, Col, Card, Button, Collapse, Spinner, Alert } from "react-bootstrap";
 
 export default function MovieDetailsPage() {
   const { Title } = useParams();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const {
