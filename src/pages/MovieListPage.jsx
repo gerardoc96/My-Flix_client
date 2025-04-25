@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getMovies } from '../features/movies/moviesSlice';
-import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
-import { Link } from 'react-router';
+import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import MovieCard from '../components/moviecard/MovieCard';
 
 export default function MovieListPage() {
   const dispatch = useDispatch();
-  const { list: movies, statusAll, errorAll } = useSelector(state => state.movies);
+  const { list: movies, statusAll, searchTerm } = useSelector(state => state.movies);
 
   useEffect(() => {
     if (statusAll === 'idle') {
@@ -30,32 +30,26 @@ export default function MovieListPage() {
     );
   }
 
+  //Case-insentitive filter
+  const filteredMovies = movies.filter(
+    movie => movie.Title.toLowerCase().includes(
+      searchTerm.toLowerCase()
+    ));
+
   return (
     <Container >
 
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {movies.map(movie => (
+        {filteredMovies.map(movie => (
 
           <Col key={movie._id}>
-            <Card>
-
-              <Link to={`/movies/${movie.Title}`}>
-                <Card.Img
-                  src={movie.ImagePath}
-                  alt={movie.Title}
-                />
-              </Link>
-
-              <Card.Body>
-                <Card.Title>{movie.Title}</Card.Title>
-              </Card.Body>
-
-            </Card>
+            <MovieCard movie={movie} variant="card" />
           </Col>
-
         ))}
       </Row>
-
+      {filteredMovies.length === 0 && (
+        <p>No movies found for "{searchTerm}".</p>
+      )}
     </Container>
   );
 }

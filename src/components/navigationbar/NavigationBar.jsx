@@ -1,16 +1,23 @@
 import React from 'react';
-import { Navbar, Nav, Container, Button } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button, Form } from 'react-bootstrap';
 import { NavLink, useNavigate, useLocation } from 'react-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
+import { setSearchTerm } from '../../features/movies/moviesSlice';
 
 export default function NavigationBar() {
-  const { token } = useSelector((state) => state.auth);
+  const { token } = useSelector(state => state.auth);
+  const searchTerm = useSelector(state => state.movies.searchTerm);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const location = useLocation();
   const isMovieDetailsPage = location.pathname.startsWith('/movies/') && location.pathname.split('/').length === 3;
+  const isMoviesListPage = location.pathname === '/movies';
+
+  const handleSearchChange = e => {
+    dispatch(setSearchTerm(e.target.value));
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -41,11 +48,23 @@ export default function NavigationBar() {
                   Profile
                 </Nav.Link>
 
-
-
               </>
             )}
           </Nav>
+
+          {/* Search box */}
+          {isMoviesListPage && (
+
+            <Form onSubmit={e => e.preventDefault()}>
+              <Form.Control
+                type='search'
+                placeholder='Search movies'
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </Form>
+          )}
+
 
           <Nav>
             {!token ? (

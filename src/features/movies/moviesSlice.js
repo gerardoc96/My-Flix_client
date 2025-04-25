@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, current } from '@reduxjs/toolkit';
 import api from '../../api/axios';
 
-// Thunk for fetching all movies
+// Async Thunk for  fetching all movies
 export const getMovies = createAsyncThunk(
   'movies/getAll',
 
@@ -15,7 +15,7 @@ export const getMovies = createAsyncThunk(
   }
 );
 
-// Thunk for fetching a single movie by ID
+// Async Thunk for  fetching a single movie by ID
 export const getMovie = createAsyncThunk(
   'movies/getOne',
 
@@ -29,6 +29,7 @@ export const getMovie = createAsyncThunk(
   }
 );
 
+
 // initial state
 const moviesSlice = createSlice({
   name: 'movies',
@@ -38,9 +39,14 @@ const moviesSlice = createSlice({
     statusAll: 'idle',
     statusOne: 'idle',
     errorAll: null,
-    errorOne: null
+    errorOne: null,
+    searchTerm: ''
   },
-  reducers: {},
+  reducers: {
+    setSearchTerm(state, action) {
+      state.searchTerm = action.payload;
+    }
+  },
 
   // handles the three states of the getMovies thunk
   extraReducers: builder => {
@@ -76,4 +82,5 @@ const moviesSlice = createSlice({
 
 });
 
+export const { setSearchTerm } = moviesSlice.actions;
 export default moviesSlice.reducer;
