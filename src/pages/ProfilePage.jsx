@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { Container, Card, ListGroup, Button, Alert } from 'react-bootstrap';
+import { Container, Card, ListGroup, Button, Alert, Row, Col } from 'react-bootstrap';
 import { updateUser, deleteUser } from '../features/auth/authSlice';
 import UserForm from '../components/userform/UserForm';
+import MovieCard from '../components/moviecard/MovieCard';
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, updateStatus, updateError, deleteStatus, deleteError } = useSelector((state) => state.auth);
+
+  const { list } = useSelector(state => state.movies);
+  const favs = list.filter(m => user.FavoriteMovies.includes(m._id));
 
   // Toggle view vs edit
   const [isEditing, setIsEditing] = useState(false);
@@ -93,6 +97,15 @@ export default function ProfilePage() {
           </ListGroup>
         </Card>
       )}
+
+      <h3>Your Favorites</h3>
+      <Row xs={2} sm={3} md={4}>
+        {favs.map(movie => (
+          <Col key={movie._id}>
+            <MovieCard movie={movie} variant="small" />
+          </Col>
+        ))}
+      </Row>
 
       {updateStatus === 'failed' && (
         <Alert variant='danger'>Update failed: {updateError}</Alert>

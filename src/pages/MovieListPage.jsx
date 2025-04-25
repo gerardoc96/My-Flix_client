@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getMovies } from '../features/movies/moviesSlice';
-import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import { Link } from 'react-router';
+import MovieCard from '../components/moviecard/MovieCard';
 
 export default function MovieListPage() {
   const dispatch = useDispatch();
@@ -37,25 +38,10 @@ export default function MovieListPage() {
         {movies.map(movie => (
 
           <Col key={movie._id}>
-            <Card>
-
-              <Link to={`/movies/${movie.Title}`}>
-                <Card.Img
-                  src={movie.ImagePath}
-                  alt={movie.Title}
-                />
-              </Link>
-
-              <Card.Body>
-                <Card.Title>{movie.Title}</Card.Title>
-              </Card.Body>
-
-            </Card>
+            <MovieCard movie={movie} variant="card" />
           </Col>
-
         ))}
       </Row>
-
     </Container>
   );
 }
