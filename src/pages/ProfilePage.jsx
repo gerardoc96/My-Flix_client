@@ -26,7 +26,7 @@ export default function ProfilePage() {
   };
 
   const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete your profiel? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete your profile? This action cannot be undone.')) {
       dispatch(deleteUser());
     }
   };

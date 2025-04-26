@@ -6,7 +6,7 @@ import MovieCard from '../components/moviecard/MovieCard';
 
 export default function MovieListPage() {
   const dispatch = useDispatch();
-  const { list: movies, statusAll, searchTerm } = useSelector(state => state.movies);
+  const { list: movies, statusAll, errorAll, searchTerm } = useSelector(state => state.movies);
 
   useEffect(() => {
     if (statusAll === 'idle') {
@@ -25,7 +25,7 @@ export default function MovieListPage() {
   if (statusAll === 'failed') {
     return (
       <Container className="text-center mt-5">
-        <Alert variant="danger">{error}</Alert>
+        <Alert variant="danger">{errorAll}</Alert>
       </Container>
     );
   }
