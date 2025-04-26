@@ -6,7 +6,7 @@
   "author": "",
   "scripts": {
     "dev": "parcel src/index.html",
-    "build": "parcel build src/index.html --public-url",
+    "build": "parcel build src/index.html --public-url /",
     "start": "npm run dev"
   },
   "dependencies": {
