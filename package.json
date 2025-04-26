@@ -7,7 +7,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "parcel src/index.html",
-    "build": "parcel build src/index.html",
+    "build": "parcel build src/index.html --public-url",
     "start": "npm run dev"
   },
   "dependencies": {
@@ -28,5 +28,8 @@
     "buffer": "^6.0.3",
     "parcel": "^2.9.3",
     "process": "^0.11.10"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
