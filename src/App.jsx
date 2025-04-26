@@ -6,7 +6,7 @@ import MovieListPage from './pages/MovieListPage';
 import MovieDetailsPage from './pages/MovieDetailsPage';
 import ProfilePage from './pages/ProfilePage';
 import NavigationBar from './components/navigationbar/NavigationBar';
-import PrivateRoute from './components/PrivateRoute/PrivateRoute';
+import PrivateRoute from './components/privateroute/PrivateRoute';
 
 
 export default function App() {
