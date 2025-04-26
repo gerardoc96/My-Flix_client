@@ -52,16 +52,16 @@ export default function ProfilePage() {
       <div>
         <h2>Profile</h2>
         {isEditing ? (
-          <Button onClick={() => setIsEditing(false)}
+          <Button size='sm' className='mb-2' onClick={() => setIsEditing(false)}
             disabled={isBusy}>
             Cancel
           </Button>
         ) : (
-          <div>
-            <Button onClick={() => setIsEditing(true)}>
+          <div className='mb-2'>
+            <Button size='sm' onClick={() => setIsEditing(true)}>
               Edit Profile
             </Button>
-            <Button variant='danger' onClick={handleDelete}
+            <Button size='sm' className='ms-2' variant='danger' onClick={handleDelete}
               disabled={deleteStatus === 'loading'}>
               {deleteStatus === 'loading' ? 'Deleting...' : 'Delete Profile'}
             </Button>
@@ -97,15 +97,16 @@ export default function ProfilePage() {
           </ListGroup>
         </Card>
       )}
-
-      <h3>Your Favorites</h3>
-      <Row xs={2} sm={3} md={4}>
-        {favs.map(movie => (
-          <Col key={movie._id}>
-            <MovieCard movie={movie} variant="small" />
-          </Col>
-        ))}
-      </Row>
+      <div className='mt-2' >
+        <h3>Your Favorites</h3>
+        <Row xs={2} sm={3} md={4}>
+          {favs.map(movie => (
+            <Col key={movie._id}>
+              <MovieCard movie={movie} />
+            </Col>
+          ))}
+        </Row>
+      </div>
 
       {updateStatus === 'failed' && (
         <Alert variant='danger'>Update failed: {updateError}</Alert>

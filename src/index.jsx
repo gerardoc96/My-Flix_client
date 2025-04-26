@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter } from 'react-router';
 import App from './App';
 
+//Creates a root for React to render into
 const root = createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>

@@ -29,7 +29,7 @@ export default function NavigationBar() {
 
       <Container>
 
-        <Navbar.Brand as={NavLink} to="/movies">
+        <Navbar.Brand as={NavLink} to="/movies" className='fw-bold fs-4'>
           MyFlix
         </Navbar.Brand>
 
@@ -40,11 +40,11 @@ export default function NavigationBar() {
             {token && (
               <>
 
-                <Nav.Link as={NavLink} to="/movies">
+                <Nav.Link as={NavLink} to="/movies" className='px-4'>
                   Movies
                 </Nav.Link>
 
-                <Nav.Link as={NavLink} to="/profile">
+                <Nav.Link as={NavLink} to="/profile" className='px-4'>
                   Profile
                 </Nav.Link>
 
@@ -55,12 +55,14 @@ export default function NavigationBar() {
           {/* Search box */}
           {isMoviesListPage && (
 
-            <Form onSubmit={e => e.preventDefault()}>
+            <Form className='d-flex me-5' onSubmit={e => e.preventDefault()}>
               <Form.Control
                 type='search'
                 placeholder='Search movies'
                 value={searchTerm}
                 onChange={handleSearchChange}
+                style={{ width: '250px' }}
+                size='sm'
               />
             </Form>
           )}
@@ -70,24 +72,34 @@ export default function NavigationBar() {
             {!token ? (
               <>
 
-                <Nav.Link as={NavLink} to="/login">
+                <Nav.Link as={NavLink} to="/login" className='px-4'>
                   Login
                 </Nav.Link>
 
-                <Nav.Link as={NavLink} to="/signup">
+                <Nav.Link as={NavLink} to="/signup" className='px-4'>
                   Sign Up
                 </Nav.Link>
 
               </>
             ) : (
-              <Button onClick={handleLogout}>
+              <Button
+                size='sm'
+                variant='outline-light'
+                onClick={handleLogout}
+              >
                 Logout
               </Button>
             )}
 
             {isMovieDetailsPage && (
-              <Button onClick={() => navigate(-1)}>
-                Go Back</Button>
+              <Button
+                size='sm'
+                variant='outline-light'
+                className='ms-3'
+                onClick={() => navigate(-1)}
+              >
+                Go Back
+              </Button>
             )}
           </Nav>
 
