@@ -14,7 +14,7 @@ export default function MovieCard({ movie, variant = 'card' }) {
         variant='top'
         src={movie.ImagePath}
         alt={movie.Title}
-        style={{ objectFit: 'cover', height: '450px' }}
+        style={{ maxHeight: '400px', objectFit: 'contain', width: '100%' }}
       />
       <Card.Body>
 

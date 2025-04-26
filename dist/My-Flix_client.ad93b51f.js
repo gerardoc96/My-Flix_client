@@ -45720,8 +45720,9 @@ function MovieCard({ movie, variant = 'card' }) {
                 src: movie.ImagePath,
                 alt: movie.Title,
                 style: {
-                    objectFit: 'cover',
-                    height: '450px'
+                    maxHeight: '400px',
+                    objectFit: 'contain',
+                    width: '100%'
                 }
             }, void 0, false, {
                 fileName: "src/components/moviecard/MovieCard.jsx",
