@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { Container, Card, ListGroup, Button, Alert, Row, Col } from 'react-bootstrap';
 import { updateUser, deleteUser } from '../features/auth/authSlice';
+import { getMovies } from '../features/movies/moviesSlice';
 import UserForm from '../components/userform/UserForm';
 import MovieCard from '../components/moviecard/MovieCard';
 
@@ -11,8 +12,8 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, updateStatus, updateError, deleteStatus, deleteError } = useSelector((state) => state.auth);
 
-  const { list } = useSelector(state => state.movies);
-  const favs = list.filter(m => user.FavoriteMovies.includes(m._id));
+  const { list: movies, statusAll } = useSelector(state => state.movies);
+  const favs = movies.filter(m => user.FavoriteMovies.includes(m._id));
 
   // Toggle view vs edit
   const [isEditing, setIsEditing] = useState(false);
@@ -46,6 +47,12 @@ export default function ProfilePage() {
       navigate('/login');
     }
   }, [deleteStatus, navigate]);
+
+  useEffect(() => {
+    if (statusAll === 'idle') {
+      dispatch(getMovies());
+    }
+  }, [statusAll, dispatch]);
 
   return (
     <Container>

@@ -75492,6 +75492,7 @@ var _reactRedux = require("react-redux");
 var _reactRouter = require("react-router");
 var _reactBootstrap = require("react-bootstrap");
 var _authSlice = require("../features/auth/authSlice");
+var _moviesSlice = require("../features/movies/moviesSlice");
 var _userForm = require("../components/userform/UserForm");
 var _userFormDefault = parcelHelpers.interopDefault(_userForm);
 var _movieCard = require("../components/moviecard/MovieCard");
@@ -75502,8 +75503,8 @@ function ProfilePage() {
     const dispatch = (0, _reactRedux.useDispatch)();
     const navigate = (0, _reactRouter.useNavigate)();
     const { user, updateStatus, updateError, deleteStatus, deleteError } = (0, _reactRedux.useSelector)((state)=>state.auth);
-    const { list } = (0, _reactRedux.useSelector)((state)=>state.movies);
-    const favs = list.filter((m)=>user.FavoriteMovies.includes(m._id));
+    const { list: movies, statusAll } = (0, _reactRedux.useSelector)((state)=>state.movies);
+    const favs = movies.filter((m)=>user.FavoriteMovies.includes(m._id));
     // Toggle view vs edit
     const [isEditing, setIsEditing] = (0, _react.useState)(false);
     const handleUpdate = (formData)=>{
@@ -75528,6 +75529,12 @@ function ProfilePage() {
         deleteStatus,
         navigate
     ]);
+    (0, _react.useEffect)(()=>{
+        if (statusAll === 'idle') dispatch((0, _moviesSlice.getMovies)());
+    }, [
+        statusAll,
+        dispatch
+    ]);
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Container), {
         children: [
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -75536,7 +75543,7 @@ function ProfilePage() {
                         children: "Profile"
                     }, void 0, false, {
                         fileName: "src/pages/ProfilePage.jsx",
-                        lineNumber: 53,
+                        lineNumber: 60,
                         columnNumber: 9
                     }, this),
                     isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
@@ -75547,7 +75554,7 @@ function ProfilePage() {
                         children: "Cancel"
                     }, void 0, false, {
                         fileName: "src/pages/ProfilePage.jsx",
-                        lineNumber: 55,
+                        lineNumber: 62,
                         columnNumber: 11
                     }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                         className: "mb-2",
@@ -75558,7 +75565,7 @@ function ProfilePage() {
                                 children: "Edit Profile"
                             }, void 0, false, {
                                 fileName: "src/pages/ProfilePage.jsx",
-                                lineNumber: 61,
+                                lineNumber: 68,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Button), {
@@ -75570,19 +75577,19 @@ function ProfilePage() {
                                 children: deleteStatus === 'loading' ? 'Deleting...' : 'Delete Profile'
                             }, void 0, false, {
                                 fileName: "src/pages/ProfilePage.jsx",
-                                lineNumber: 64,
+                                lineNumber: 71,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/pages/ProfilePage.jsx",
-                        lineNumber: 60,
+                        lineNumber: 67,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 52,
+                lineNumber: 59,
                 columnNumber: 7
             }, this),
             isEditing ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _userFormDefault.default), {
@@ -75593,7 +75600,7 @@ function ProfilePage() {
                 submitLabel: isBusy ? 'Saving...' : 'Save Changes'
             }, void 0, false, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 73,
+                lineNumber: 80,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Card), {
                 children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup), {
@@ -75605,7 +75612,7 @@ function ProfilePage() {
                                     children: "Username:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 85,
+                                    lineNumber: 92,
                                     columnNumber: 15
                                 }, this),
                                 " ",
@@ -75613,7 +75620,7 @@ function ProfilePage() {
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 84,
+                            lineNumber: 91,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
@@ -75622,7 +75629,7 @@ function ProfilePage() {
                                     children: "Email:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 89,
+                                    lineNumber: 96,
                                     columnNumber: 15
                                 }, this),
                                 " ",
@@ -75630,7 +75637,7 @@ function ProfilePage() {
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 88,
+                            lineNumber: 95,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.ListGroup).Item, {
@@ -75639,7 +75646,7 @@ function ProfilePage() {
                                     children: "Birthday:"
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 93,
+                                    lineNumber: 100,
                                     columnNumber: 15
                                 }, this),
                                 ' ',
@@ -75647,18 +75654,18 @@ function ProfilePage() {
                             ]
                         }, void 0, true, {
                             fileName: "src/pages/ProfilePage.jsx",
-                            lineNumber: 92,
+                            lineNumber: 99,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/pages/ProfilePage.jsx",
-                    lineNumber: 82,
+                    lineNumber: 89,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 81,
+                lineNumber: 88,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -75668,7 +75675,7 @@ function ProfilePage() {
                         children: "Your Favorites"
                     }, void 0, false, {
                         fileName: "src/pages/ProfilePage.jsx",
-                        lineNumber: 101,
+                        lineNumber: 108,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Row), {
@@ -75680,23 +75687,23 @@ function ProfilePage() {
                                     movie: movie
                                 }, void 0, false, {
                                     fileName: "src/pages/ProfilePage.jsx",
-                                    lineNumber: 105,
+                                    lineNumber: 112,
                                     columnNumber: 15
                                 }, this)
                             }, movie._id, false, {
                                 fileName: "src/pages/ProfilePage.jsx",
-                                lineNumber: 104,
+                                lineNumber: 111,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "src/pages/ProfilePage.jsx",
-                        lineNumber: 102,
+                        lineNumber: 109,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 100,
+                lineNumber: 107,
                 columnNumber: 7
             }, this),
             updateStatus === 'failed' && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
@@ -75707,7 +75714,7 @@ function ProfilePage() {
                 ]
             }, void 0, true, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 112,
+                lineNumber: 119,
                 columnNumber: 9
             }, this),
             deleteStatus === 'failed' && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _reactBootstrap.Alert), {
@@ -75718,17 +75725,17 @@ function ProfilePage() {
                 ]
             }, void 0, true, {
                 fileName: "src/pages/ProfilePage.jsx",
-                lineNumber: 116,
+                lineNumber: 123,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/pages/ProfilePage.jsx",
-        lineNumber: 51,
+        lineNumber: 58,
         columnNumber: 5
     }, this);
 }
-_s(ProfilePage, "ghT1X6IzO1z5RYF+Z8WAZzEtqBE=", false, function() {
+_s(ProfilePage, "A3nMnMymfAHH7jVgHfrkYUxypy8=", false, function() {
     return [
         (0, _reactRedux.useDispatch),
         (0, _reactRouter.useNavigate),
@@ -75745,7 +75752,7 @@ $RefreshReg$(_c, "ProfilePage");
   globalThis.$RefreshReg$ = prevRefreshReg;
   globalThis.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","react-redux":"hbNxT","react-router":"2jawN","react-bootstrap":"ctEhb","../features/auth/authSlice":"2jBXe","../components/userform/UserForm":"7GmSf","../components/moviecard/MovieCard":"gockd","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi"}],"dN7vr":[function(require,module,exports,__globalThis) {
+},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","react-redux":"hbNxT","react-router":"2jawN","react-bootstrap":"ctEhb","../features/auth/authSlice":"2jBXe","../components/userform/UserForm":"7GmSf","../components/moviecard/MovieCard":"gockd","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi","../features/movies/moviesSlice":"4Q9QM"}],"dN7vr":[function(require,module,exports,__globalThis) {
 var $parcel$ReactRefreshHelpers$d070 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 $parcel$ReactRefreshHelpers$d070.init();
 var prevRefreshReg = globalThis.$RefreshReg$;
