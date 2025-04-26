@@ -35,7 +35,7 @@ export default function LoginPage() {
 
       <Form onSubmit={handleSubmit}>
 
-        <Form.Group controlId="username">
+        <Form.Group controlId="username" className='mb-2'>
           <Form.Label>Username</Form.Label>
           <Form.Control
             type="text"
@@ -45,7 +45,7 @@ export default function LoginPage() {
           />
         </Form.Group>
 
-        <Form.Group controlId="password">
+        <Form.Group controlId="password" className='mb-2'>
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"

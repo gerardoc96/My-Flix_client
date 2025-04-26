@@ -9,15 +9,19 @@ export default function MovieCard({ movie, variant = 'card' }) {
   const [showDirector, setShowDirector] = useState(false);
 
   return (
-    <Card className={variant === 'small' ? 'h-100' : ''}>
-      <Card.Img src={movie.ImagePath} alt={movie.Title} />
+    <Card className={'shadow-sm mb-2 mt-2'} variant='card'>
+      <Card.Img
+        variant='top'
+        src={movie.ImagePath}
+        alt={movie.Title}
+        style={{ objectFit: 'cover', height: '450px' }}
+      />
       <Card.Body>
 
-        <Card.Title>
+        <Card.Title className='d-flex justify-content-between align-items-center'>
           <Link to={`/movies/${encodeURIComponent(movie.Title)}`}>{movie.Title}</Link>
+          <FavoriteButton movieId={movie._id} />
         </Card.Title>
-
-        <FavoriteButton movieId={movie._id} />
 
         {variant === 'detail' && (
           <>
@@ -70,5 +74,5 @@ MovieCard.propTypes = {
       Death: PropTypes.string,
     }),
   }).isRequired,
-  variant: PropTypes.oneOf(['card', 'detail', 'small']),
+  variant: PropTypes.oneOf(['card', 'detail']),
 };

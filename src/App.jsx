@@ -49,7 +49,6 @@ export default function App() {
 
         {/* Fallback Routes */}
         <Route path="/" element={<Navigate to="/movies" />} />
-        {/* <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>
     </>
   )
